@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>qntm — the path of least resistance</title>
+<meta name="description" content="A personal operating system. It holds what you know long enough to act on it — at the resolution the moment deserves, and no more. The path of least resistance. Coming to qntm.network." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg:        #0a0b0a;
+    --bg-soft:   #0f120f;
+    --line:      #1c211c;
+    --line-lit:  #2a322a;
+    --ink:       #e6ebe6;
+    --ink-dim:   #8a948a;
+    --ink-faint: #555c55;
+    --acc:       #3ff07f;
+    --acc-dim:   #1f7a44;
+    --acc-glow:  rgba(63,240,127,0.14);
+    --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans: 'Inter', -apple-system, system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg); color: var(--ink); font-family: var(--sans);
+    line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: hidden;
+  }
+  ::selection { background: var(--acc); color: #04120a; }
+
+  #graph { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; opacity: 0.42; pointer-events: none; }
+  .vignette { position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background: radial-gradient(ellipse at 50% 38%, transparent 28%, rgba(10,11,10,0.6) 100%); }
+  .wrap { position: relative; z-index: 2; }
+
+  section { padding: clamp(5.5rem, 14vh, 12rem) clamp(1.5rem, 6vw, 7rem); }
+  .eyebrow {
+    font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.32em;
+    text-transform: uppercase; color: var(--acc); margin-bottom: 1.8rem;
+    display: flex; align-items: center; gap: 0.7rem;
+  }
+  .eyebrow::before { content:''; width: 26px; height: 1px; background: var(--acc-dim); }
+  .eyebrow.center { justify-content: center; }
+
+  /* nav */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 10;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 1.1rem clamp(1.5rem, 6vw, 7rem);
+    backdrop-filter: blur(8px);
+    background: linear-gradient(to bottom, rgba(10,11,10,0.85), rgba(10,11,10,0));
+  }
+  .brand { font-family: var(--mono); font-weight: 500; font-size: 1.05rem; letter-spacing: 0.04em; display: flex; align-items: center; gap: 0.55rem; }
+  .brand .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 12px var(--acc); animation: pulse 2.6s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.45} }
+  .navlink {
+    font-family: var(--mono); font-size: 0.78rem; color: var(--ink-dim); text-decoration: none;
+    letter-spacing: 0.04em; border: 1px solid var(--line-lit); padding: 0.45rem 0.9rem; border-radius: 6px; transition: all 0.2s;
+  }
+  .navlink:hover { color: var(--acc); border-color: var(--acc-dim); }
+
+  /* hero */
+  .hero { min-height: 100vh; display: flex; flex-direction: column; justify-content: center; padding-top: 6rem; }
+  .hero .kicker {
+    display: inline-flex; align-items: center; gap: 0.7rem;
+    font-family: var(--mono); font-weight: 600;
+    font-size: clamp(1.6rem, 3.6vw, 2.5rem); color: var(--ink);
+    letter-spacing: 0.01em; margin-bottom: 1.8rem;
+  }
+  .hero .kicker .dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: var(--acc); box-shadow: 0 0 18px var(--acc), 0 0 4px var(--acc);
+    animation: pulse 2.6s ease-in-out infinite;
+  }
+  .hero h1 {
+    font-size: clamp(2.9rem, 9vw, 7.2rem); font-weight: 600; line-height: 0.96;
+    letter-spacing: -0.035em; margin-bottom: 2.2rem; max-width: 16ch;
+  }
+  .hero h1 .g { color: var(--acc); }
+  .hero .lede {
+    font-size: clamp(1.1rem, 2.1vw, 1.45rem); color: var(--ink-dim);
+    max-width: 52ch; font-weight: 300; margin-bottom: 2.8rem;
+  }
+  .hero .lede strong { color: var(--ink); font-weight: 500; }
+
+  /* access */
+  .access { display: flex; gap: 0.7rem; flex-wrap: wrap; align-items: center; max-width: 480px; }
+  .access input {
+    flex: 1 1 240px; background: rgba(15,18,15,0.7); border: 1px solid var(--line-lit);
+    border-radius: 8px; padding: 0.85rem 1.1rem; color: var(--ink);
+    font-family: var(--mono); font-size: 0.86rem; outline: none; transition: border 0.2s;
+  }
+  .access input::placeholder { color: var(--ink-faint); }
+  .access input:focus { border-color: var(--acc-dim); }
+  .access button {
+    background: var(--acc); color: #04120a; font-family: var(--mono); font-weight: 600;
+    font-size: 0.86rem; letter-spacing: 0.02em; border: none; border-radius: 8px;
+    padding: 0.85rem 1.5rem; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  }
+  .access button:hover { box-shadow: 0 0 32px var(--acc-glow); transform: translateY(-1px); }
+  .access-note { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-faint); margin-top: 0.9rem; letter-spacing: 0.04em; }
+
+  .scroll-hint {
+    position: absolute; bottom: 2.2rem; left: clamp(1.5rem, 6vw, 7rem);
+    font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.2em; color: var(--ink-faint);
+    text-transform: uppercase; display: flex; align-items: center; gap: 0.6rem;
+  }
+  .scroll-hint::after { content:''; width: 1px; height: 28px; background: linear-gradient(var(--acc-dim), transparent); animation: drop 2s ease-in-out infinite; }
+  @keyframes drop { 0%,100%{opacity:0.3; transform:scaleY(0.7)} 50%{opacity:1; transform:scaleY(1)} }
+
+  /* opening statement */
+  .opening { border-top: 1px solid var(--line); }
+  .opening .big {
+    font-size: clamp(1.7rem, 4.4vw, 3.2rem); font-weight: 500; letter-spacing: -0.02em;
+    line-height: 1.18; max-width: 30ch; color: var(--ink-dim);
+  }
+  .opening .big b { color: var(--ink); font-weight: 600; }
+  .opening .big .g { color: var(--acc); font-weight: 600; }
+
+  /* triad */
+  .triad { background: var(--bg-soft); border-top: 1px solid var(--line); }
+  .spine { margin-bottom: 3.4rem; }
+  .spine .l { font-size: clamp(1.5rem, 4vw, 2.7rem); font-weight: 600; letter-spacing: -0.02em; line-height: 1.18; color: var(--ink); }
+  .spine .l .v { color: var(--acc); }
+  .spine .l.dim { color: var(--ink-faint); }
+  .triad-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px,1fr)); gap: 1.4rem; }
+  .pillar {
+    border: 1px solid var(--line); border-radius: 12px; padding: 1.9rem 1.8rem; background: var(--bg);
+    transition: all 0.25s; position: relative; overflow: hidden;
+  }
+  .pillar::before { content:''; position: absolute; top:0; left:0; width:100%; height:2px;
+    background: linear-gradient(90deg, var(--acc-dim), transparent); opacity:0; transition: opacity 0.25s; }
+  .pillar:hover { border-color: var(--line-lit); transform: translateY(-3px); }
+  .pillar:hover::before { opacity: 1; }
+  .pillar .num { font-family: var(--mono); font-size: 0.72rem; color: var(--acc); letter-spacing: 0.14em; }
+  .pillar h3 { font-size: 1.35rem; font-weight: 600; margin: 0.9rem 0 1rem; letter-spacing: -0.01em; }
+  .pillar .quote { font-size: 1.02rem; color: var(--ink); font-weight: 400; line-height: 1.45; letter-spacing: -0.01em; }
+  .pillar .gloss { font-size: 0.9rem; color: var(--ink-dim); font-weight: 300; margin-top: 0.9rem; line-height: 1.5; }
+
+  /* creed */
+  .creed { border-top: 1px solid var(--line); }
+  .fragment {
+    padding: clamp(1.8rem, 4.5vh, 3.2rem) 0; border-bottom: 1px solid var(--line);
+    max-width: 30ch;
+  }
+  .fragment:last-of-type { border-bottom: none; }
+  .fragment p {
+    font-size: clamp(1.7rem, 5vw, 3.5rem); font-weight: 600; letter-spacing: -0.025em; line-height: 1.08;
+    color: var(--ink-dim); transition: color 0.5s ease;
+  }
+  .fragment.in p { color: var(--ink); }
+  .fragment p .g { color: var(--acc); }
+  .fragment .src { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-faint); letter-spacing: 0.1em; margin-top: 1.1rem; }
+
+  /* closing */
+  .closing { text-align: center; background: var(--bg-soft); border-top: 1px solid var(--line); }
+  .closing .kicker { font-family: var(--mono); font-size: clamp(1rem,2vw,1.3rem); color: var(--ink-dim); margin-bottom: 0.7rem; }
+  .closing h2 { font-size: clamp(2.2rem, 6.5vw, 4.6rem); font-weight: 600; letter-spacing: -0.03em; line-height: 1.0; margin-bottom: 1.4rem; }
+  .closing h2 .g { color: var(--acc); }
+  .closing p { color: var(--ink-dim); font-weight: 300; max-width: 46ch; margin: 0 auto 2.6rem; font-size: 1.1rem; }
+  .closing .access { margin: 0 auto; justify-content: center; }
+  .closing .access-note { text-align: center; }
+
+  /* footer */
+  footer { border-top: 1px solid var(--line); padding: 3rem clamp(1.5rem, 6vw, 7rem) 3.5rem; }
+  .foot-top { display: flex; justify-content: space-between; align-items: flex-end; gap: 2rem; flex-wrap: wrap; }
+  .foot-mark { font-family: var(--mono); font-size: 1.4rem; font-weight: 500; }
+  .foot-mark .dot { color: var(--acc); }
+  .foot-tag { font-family: var(--mono); color: var(--ink-faint); font-size: 0.76rem; max-width: 36ch; margin-top: 0.6rem; }
+  .foot-meta { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-faint); letter-spacing: 0.06em; }
+  .foot-meta a { color: var(--ink-dim); text-decoration: none; }
+  .foot-meta a:hover { color: var(--acc); }
+
+  /* ---- mobile ---- */
+  @media (max-width: 760px) {
+    section { padding: clamp(4rem, 9vh, 6rem) 1.4rem; }
+    nav { padding: 0.95rem 1.4rem; }
+    .hero { padding-top: 5rem; }
+    .access { max-width: 100%; }
+    .access input { flex: 1 1 100%; }
+    .access button { flex: 1 1 100%; }
+    .closing .access { max-width: 360px; }
+    .scroll-hint { left: 1.4rem; }
+    .foot-top { align-items: flex-start; }
+  }
+  @media (max-width: 460px) {
+    nav .navlink { padding: 0.4rem 0.7rem; font-size: 0.72rem; }
+    .hero h1 { letter-spacing: -0.02em; }
+  }
+</style>
+</head>
+<body>
+<canvas id="graph"></canvas>
+<div class="vignette"></div>
+
+<nav>
+  <div class="brand"><span class="dot"></span>qntm</div>
+  <a class="navlink" href="#access">qntm.network →</a>
+</nav>
+
+<div class="wrap">
+
+  <!-- HERO -->
+  <header class="hero" id="top">
+    <div class="kicker"><span class="dot"></span>qntm</div>
+    <h1>The path of <span class="g">least resistance.</span></h1>
+    <p class="lede">
+      Most of life is not forecasting the future. It is doing the next thing that is
+      clearly required. qntm makes that next thing <strong>legible</strong> — and the path
+      to it, the shortest one.
+    </p>
+    <form class="access" onsubmit="return false;">
+      <input type="email" placeholder="you@email.com" aria-label="email" />
+      <button type="submit">Request access →</button>
+    </form>
+    <div class="access-note">A personal operating system. Building in the open. One message, when it's ready.</div>
+    <div class="scroll-hint">the work</div>
+  </header>
+
+  <!-- OPENING STATEMENT -->
+  <section class="opening" id="opening">
+    <div class="eyebrow">the premise</div>
+    <p class="big">
+      Nine times out of ten the future is not the problem. The present is just cluttered, opaque,
+      overwhelming. <b>qntm clears it.</b> It exposes blockers without judgment, lets leverage
+      be seen rather than felt, and <span class="g">replaces guilt and anxiety with topology.</span>
+    </p>
+  </section>
+
+  <!-- TRIAD -->
+  <section class="triad" id="triad">
+    <div class="eyebrow">the three acts</div>
+    <div class="spine">
+      <div class="l">Structure makes action <span class="v">possible.</span></div>
+      <div class="l">Resolution makes action <span class="v">deliberate.</span></div>
+      <div class="l">Discernment makes action <span class="v">right-sized.</span></div>
+    </div>
+
+    <div class="triad-grid">
+      <div class="pillar">
+        <div class="num">01 — STRUCTURE</div>
+        <h3>Help me do what I already know needs doing.</h3>
+        <p class="quote">A blocked chain is not an opinion. A bottleneck is not a feeling. A hub is not a story. They are properties of the graph.</p>
+        <p class="gloss">Structure forces clarity without demanding interpretation. And unlike content, it compounds.</p>
+      </div>
+      <div class="pillar">
+        <div class="num">02 — RESOLUTION</div>
+        <h3>The moment possibility becomes declaration.</h3>
+        <p class="quote">The deliberate act of collapsing what is implicit into something explicit enough to be acted upon — and no further.</p>
+        <p class="gloss">Not an end state. A repeated practice. Resolution is not control over life — it is service to what is.</p>
+      </div>
+      <div class="pillar">
+        <div class="num">03 — DISCERNMENT</div>
+        <h3>Detection does not yet confer permission.</h3>
+        <p class="quote">Given what this is, and how we know it — what is the least violent action that honours it?</p>
+        <p class="gloss">Holding what is known long enough to determine how much force it deserves. It whispers. It does not rule.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CREED -->
+  <section class="creed" id="creed">
+    <div class="eyebrow">from the foundational statements</div>
+
+    <div class="fragment" data-frag>
+      <p>Between sensing and acting lies a <span class="g">quieter faculty.</span></p>
+      <div class="src">— On Discernment and the Right to Act</div>
+    </div>
+    <div class="fragment" data-frag>
+      <p>Structure does not replace judgment. It gives judgment <span class="g">somewhere to stand.</span></p>
+      <div class="src">— On Structure, Action, and Collective Insight</div>
+    </div>
+    <div class="fragment" data-frag>
+      <p>Meaning is no longer narrated in language. It is <span class="g">embodied in structure.</span></p>
+      <div class="src">— On Structure, Action, and Collective Insight</div>
+    </div>
+    <div class="fragment" data-frag>
+      <p>Some ideas are not ambitions. They are <span class="g">obligations.</span></p>
+      <div class="src">— On Structure, Action, and Collective Insight</div>
+    </div>
+  </section>
+
+  <!-- CLOSING -->
+  <section class="closing" id="access">
+    <div class="kicker">qntm.network</div>
+    <h2>The path of <span class="g">least resistance.</span></h2>
+    <p>Nothing here requires urgency. The work is slow, grounded, earned through use. But you can be early.</p>
+    <form class="access" onsubmit="return false;">
+      <input type="email" placeholder="you@email.com" aria-label="email" />
+      <button type="submit">Request access →</button>
+    </form>
+    <div class="access-note">No noise. One message, when the doors open.</div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="foot-top">
+      <div>
+        <div class="foot-mark">qntm<span class="dot">.</span></div>
+        <div class="foot-tag">A system you operate — not a tool you use. It stands watch. It holds context. It preserves the continuity of care.</div>
+      </div>
+      <div class="foot-meta">
+        <a href="#top">qntm.network</a> · building in the open · 2026
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+  // reveal creed fragments
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.6 });
+  document.querySelectorAll('[data-frag]').forEach(el => io.observe(el));
+
+  // living graph background
+  const cv = document.getElementById('graph');
+  const ctx = cv.getContext('2d');
+  let W, H, nodes = [], DPR = Math.min(window.devicePixelRatio || 1, 2);
+  function resize() {
+    W = cv.width = innerWidth * DPR; H = cv.height = innerHeight * DPR;
+    cv.style.width = innerWidth + 'px'; cv.style.height = innerHeight + 'px';
+    const count = Math.floor((innerWidth * innerHeight) / 26000);
+    nodes = Array.from({length: Math.max(34, Math.min(count, 92))}, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: (Math.random() - 0.5) * 0.18 * DPR,
+      vy: (Math.random() - 0.5) * 0.18 * DPR,
+      r: (Math.random() * 1.4 + 0.6) * DPR,
+      lit: Math.random() < 0.18
+    }));
+  }
+  const LINK = 150;
+  function frame() {
+    ctx.clearRect(0, 0, W, H);
+    const L = LINK * DPR;
+    for (const n of nodes) {
+      n.x += n.vx; n.y += n.vy;
+      if (n.x < 0 || n.x > W) n.vx *= -1;
+      if (n.y < 0 || n.y > H) n.vy *= -1;
+    }
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        const dx = a.x - b.x, dy = a.y - b.y, d = Math.hypot(dx, dy);
+        if (d < L) {
+          const o = (1 - d / L) * 0.5;
+          ctx.strokeStyle = `rgba(63,240,127,${o * 0.28})`;
+          ctx.lineWidth = 0.6 * DPR;
+          ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+        }
+      }
+    }
+    for (const n of nodes) {
+      ctx.beginPath(); ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      if (n.lit) { ctx.fillStyle = 'rgba(63,240,127,0.9)'; ctx.shadowColor = 'rgba(63,240,127,0.8)'; ctx.shadowBlur = 8 * DPR; }
+      else { ctx.fillStyle = 'rgba(120,140,120,0.5)'; ctx.shadowBlur = 0; }
+      ctx.fill();
+    }
+    ctx.shadowBlur = 0;
+    requestAnimationFrame(frame);
+  }
+  addEventListener('resize', resize);
+  resize(); frame();
+</script>
+</body>
+</html>
