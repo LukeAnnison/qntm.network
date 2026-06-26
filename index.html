@@ -37,6 +37,33 @@
     background: radial-gradient(ellipse at 50% 38%, transparent 28%, rgba(10,11,10,0.6) 100%); }
   .wrap { position: relative; z-index: 2; }
 
+  /* custom glowing cursor */
+  #cursor-glow, #cursor-core {
+    position: fixed; top: 0; left: 0; border-radius: 50%; pointer-events: none;
+    z-index: 9999; transform: translate(-50%, -50%); opacity: 0;
+    mix-blend-mode: screen;
+  }
+  #cursor-glow {
+    width: 46px; height: 46px;
+    background: radial-gradient(circle, rgba(63,240,127,0.30) 0%, rgba(63,240,127,0.10) 38%, transparent 70%);
+    filter: blur(2px);
+    transition: width 0.25s ease, height 0.25s ease, opacity 0.3s ease;
+  }
+  #cursor-core {
+    width: 7px; height: 7px; background: var(--acc);
+    box-shadow: 0 0 12px var(--acc), 0 0 4px var(--acc);
+    transition: width 0.18s ease, height 0.18s ease, opacity 0.3s ease;
+  }
+  body.cursor-hover #cursor-glow { width: 74px; height: 74px; }
+  body.cursor-hover #cursor-core { width: 12px; height: 12px; }
+  @media (hover: hover) and (pointer: fine) {
+    body, body a, body button { cursor: none; }
+    body input { cursor: text; }
+  }
+  @media (hover: none), (pointer: coarse) {
+    #cursor-glow, #cursor-core { display: none; }
+  }
+
   section { padding: clamp(5.5rem, 14vh, 12rem) clamp(1.5rem, 6vw, 7rem); }
   .eyebrow {
     font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.32em;
@@ -141,13 +168,17 @@
   .pillar .quote { font-size: 1.02rem; color: var(--ink); font-weight: 400; line-height: 1.45; letter-spacing: -0.01em; }
   .pillar .gloss { font-size: 0.9rem; color: var(--ink-dim); font-weight: 300; margin-top: 0.9rem; line-height: 1.5; }
 
-  /* creed */
-  .creed { border-top: 1px solid var(--line); }
+  /* creed — scattered across the canvas, not a cramped column */
+  .creed { border-top: 1px solid var(--line); overflow: hidden; }
+  .creed-grid { display: flex; flex-direction: column; gap: clamp(2.6rem, 8vh, 6.5rem); margin-top: 2rem; }
   .fragment {
-    padding: clamp(1.8rem, 4.5vh, 3.2rem) 0; border-bottom: 1px solid var(--line);
-    max-width: 30ch;
+    align-self: flex-start; width: clamp(18rem, 42vw, 38rem); max-width: 100%;
+    opacity: 0.001; transform: translateY(18px); transition: opacity 0.7s ease, transform 0.7s cubic-bezier(0.2,0.7,0.2,1);
   }
-  .fragment:last-of-type { border-bottom: none; }
+  .fragment.in { opacity: 1; transform: none; }
+  .fragment:nth-child(2) { align-self: flex-end; text-align: right; }
+  .fragment:nth-child(3) { margin-left: clamp(0rem, 30vw, 32rem); }
+  .fragment:nth-child(4) { margin-left: clamp(0rem, 14vw, 16rem); }
   .fragment p {
     font-size: clamp(1.7rem, 5vw, 3.5rem); font-weight: 600; letter-spacing: -0.025em; line-height: 1.08;
     color: var(--ink-dim); transition: color 0.5s ease;
@@ -155,6 +186,9 @@
   .fragment.in p { color: var(--ink); }
   .fragment p .g { color: var(--acc); }
   .fragment .src { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-faint); letter-spacing: 0.1em; margin-top: 1.1rem; }
+
+  /* repel-text letters */
+  .repel .ltr { display: inline-block; will-change: transform; }
 
   /* closing */
   .closing { text-align: center; background: var(--bg-soft); border-top: 1px solid var(--line); }
@@ -186,6 +220,8 @@
     .closing .access { max-width: 360px; }
     .scroll-hint { left: 1.4rem; }
     .foot-top { align-items: flex-start; }
+    .creed-grid { gap: 2.6rem; }
+    .creed-grid .fragment { align-self: flex-start; text-align: left; margin-left: 0; max-width: 100%; }
   }
   @media (max-width: 460px) {
     nav .navlink { padding: 0.4rem 0.7rem; font-size: 0.72rem; }
@@ -207,7 +243,7 @@
   <!-- HERO -->
   <header class="hero" id="top">
     <div class="kicker"><span class="dot"></span>qntm</div>
-    <h1>The path of <span class="g">least resistance.</span></h1>
+    <h1 class="repel">The path of <span class="g">least resistance.</span></h1>
     <p class="lede">
       Most of life is not forecasting the future. It is doing the next thing that is
       clearly required. qntm makes that next thing <strong>legible</strong> — and the path
@@ -266,28 +302,30 @@
   <section class="creed" id="creed">
     <div class="eyebrow">from the foundational statements</div>
 
-    <div class="fragment" data-frag>
-      <p>Between sensing and acting lies a <span class="g">quieter faculty.</span></p>
-      <div class="src">— On Discernment and the Right to Act</div>
-    </div>
-    <div class="fragment" data-frag>
-      <p>Structure does not replace judgment. It gives judgment <span class="g">somewhere to stand.</span></p>
-      <div class="src">— On Structure, Action, and Collective Insight</div>
-    </div>
-    <div class="fragment" data-frag>
-      <p>Meaning is no longer narrated in language. It is <span class="g">embodied in structure.</span></p>
-      <div class="src">— On Structure, Action, and Collective Insight</div>
-    </div>
-    <div class="fragment" data-frag>
-      <p>Some ideas are not ambitions. They are <span class="g">obligations.</span></p>
-      <div class="src">— On Structure, Action, and Collective Insight</div>
+    <div class="creed-grid">
+      <div class="fragment" data-frag>
+        <p>Between sensing and acting lies a <span class="g">quieter faculty.</span></p>
+        <div class="src">— On Discernment and the Right to Act</div>
+      </div>
+      <div class="fragment" data-frag>
+        <p>Structure does not replace judgment. It gives judgment <span class="g">somewhere to stand.</span></p>
+        <div class="src">— On Structure, Action, and Collective Insight</div>
+      </div>
+      <div class="fragment" data-frag>
+        <p>Meaning is no longer narrated in language. It is <span class="g">embodied in structure.</span></p>
+        <div class="src">— On Structure, Action, and Collective Insight</div>
+      </div>
+      <div class="fragment" data-frag>
+        <p>Some ideas are not ambitions. They are <span class="g">obligations.</span></p>
+        <div class="src">— On Structure, Action, and Collective Insight</div>
+      </div>
     </div>
   </section>
 
   <!-- CLOSING -->
   <section class="closing" id="access">
     <div class="kicker">qntm.network</div>
-    <h2>The path of <span class="g">least resistance.</span></h2>
+    <h2 class="repel">The path of <span class="g">least resistance.</span></h2>
     <p>Nothing here requires urgency. The work is slow, grounded, earned through use. But you can be early.</p>
     <form class="access" onsubmit="return false;">
       <input type="email" placeholder="you@email.com" aria-label="email" />
@@ -366,6 +404,81 @@
   }
   addEventListener('resize', resize);
   resize(); frame();
+
+  // ---- custom glowing cursor (desktop / fine pointer only) ----
+  (function () {
+    if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    const glow = document.createElement('div'); glow.id = 'cursor-glow';
+    const core = document.createElement('div'); core.id = 'cursor-core';
+    document.body.append(glow, core);
+    let mx = innerWidth / 2, my = innerHeight / 2, gx = mx, gy = my, on = false;
+    addEventListener('mousemove', (e) => {
+      mx = e.clientX; my = e.clientY;
+      core.style.transform = `translate(${mx}px, ${my}px) translate(-50%, -50%)`;
+      if (!on) { on = true; glow.style.opacity = 1; core.style.opacity = 1; }
+    });
+    (function trail() {
+      gx += (mx - gx) * 0.18; gy += (my - gy) * 0.18;
+      glow.style.transform = `translate(${gx}px, ${gy}px) translate(-50%, -50%)`;
+      requestAnimationFrame(trail);
+    })();
+    document.querySelectorAll('a, button, input, .pillar').forEach((el) => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('cursor-hover'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('cursor-hover'));
+    });
+  })();
+
+  // ---- repel + spring-back text: the path of least resistance ----
+  (function () {
+    if (!matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const letters = [];
+    function wrap(text, sink) {
+      text.split(/(\s+)/).forEach((part) => {
+        if (part === '') return;
+        if (/^\s+$/.test(part)) { sink.appendChild(document.createTextNode(part)); return; }
+        const word = document.createElement('span');
+        word.style.display = 'inline-block'; word.style.whiteSpace = 'nowrap';
+        for (const ch of part) {
+          const s = document.createElement('span'); s.className = 'ltr'; s.textContent = ch;
+          word.appendChild(s); letters.push({ el: s, x: 0, y: 0, vx: 0, vy: 0 });
+        }
+        sink.appendChild(word);
+      });
+    }
+    function split(node) {
+      Array.from(node.childNodes).forEach((child) => {
+        if (child.nodeType === 3) {
+          const frag = document.createDocumentFragment();
+          wrap(child.textContent, frag);
+          node.replaceChild(frag, child);
+        } else if (child.nodeType === 1) { split(child); }
+      });
+    }
+    document.querySelectorAll('.repel').forEach(split);
+    if (!letters.length) return;
+    let mx = -9999, my = -9999;
+    addEventListener('mousemove', (e) => { mx = e.clientX; my = e.clientY; });
+    const R = 85, STR = 24, K = 0.14, D = 0.76;
+    (function tick() {
+      for (const L of letters) {
+        const r = L.el.getBoundingClientRect();
+        const cx = r.left + r.width / 2 - L.x;   // rest position (undo current transform → no feedback)
+        const cy = r.top + r.height / 2 - L.y;
+        let tx = 0, ty = 0;
+        const dx = cx - mx, dy = cy - my, dist = Math.hypot(dx, dy);
+        if (dist < R && dist > 0) {
+          const f = (1 - dist / R), a = Math.atan2(dy, dx);
+          tx = Math.cos(a) * f * STR; ty = Math.sin(a) * f * STR;
+        }
+        L.vx = (L.vx + (tx - L.x) * K) * D;
+        L.vy = (L.vy + (ty - L.y) * K) * D;
+        L.x += L.vx; L.y += L.vy;
+        L.el.style.transform = `translate(${L.x.toFixed(2)}px, ${L.y.toFixed(2)}px)`;
+      }
+      requestAnimationFrame(tick);
+    })();
+  })();
 </script>
 </body>
 </html>
