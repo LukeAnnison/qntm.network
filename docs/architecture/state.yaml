@@ -96,3 +96,29 @@ state_invariants:
     scenarios: "static_evidence"
     wired: true
     gates_capabilities: [capabilities-have-runtime-enforcers]
+
+  - id: state-link-preview-renders
+    name: a shared link renders a proper preview card
+    description: |
+      index.html declares Open Graph (og:title/description/image/url) + Twitter card meta, and a
+      1200x630 preview image (og.png) exists in the repo — so pasting qntm.network into X / iMessage
+      / Slack shows a branded card, not a bare URL. SCAFFOLD-RED until the meta + image land.
+    check: "index.html has og:title/description/image + twitter:card; og.png exists"
+    evidence_tier: static
+    predicate: qntm_network_checks:assert_link_preview_meta_present
+    scenarios: "static_evidence"
+    wired: true
+    gates_capabilities: [shared-links-render-a-preview]
+
+  - id: state-visits-are-measured
+    name: site traffic is measured (privacy-friendly)
+    description: |
+      index.html ships the Cloudflare Web Analytics beacon (static.cloudflareinsights.com/beacon
+      + a data-cf-beacon token) so visits, sources, and referrers are visible — no cookies, no
+      banner. SCAFFOLD-RED until the beacon snippet (with token) is added.
+    check: "index.html contains cloudflareinsights.com/beacon AND data-cf-beacon token"
+    evidence_tier: static
+    predicate: qntm_network_checks:assert_visits_are_measured
+    scenarios: "static_evidence"
+    wired: true
+    gates_capabilities: [visits-are-measured]

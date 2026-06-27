@@ -151,6 +151,45 @@ def assert_static_evidence_runner_wired(state: ScenarioState) -> PredicateResult
     )
 
 
+def assert_link_preview_meta_present(state: ScenarioState) -> PredicateResult:
+    """SHARE: index.html declares OG + Twitter card meta and the preview image artifact exists."""
+    if guard := _guard(state):
+        return guard
+    root = _root(state)
+    html = _read(root / "index.html")
+    needles = ["og:title", "og:description", "og:image", 'twitter:card']
+    missing = [n for n in needles if n not in html]
+    if not (root / "og.png").is_file():
+        missing.append("og.png (preview image file)")
+    if missing:
+        return PredicateResult(status="FAIL", message=f"link-preview not wired — missing {missing}", observed_ref="index.html")
+    return PredicateResult(
+        status="PASS",
+        message="OG + Twitter card meta present and og.png preview image exists (link previews render)",
+        observed_ref="index.html",
+    )
+
+
+def assert_visits_are_measured(state: ScenarioState) -> PredicateResult:
+    """SEE: index.html ships a privacy-friendly analytics beacon (Cloudflare Web Analytics)."""
+    if guard := _guard(state):
+        return guard
+    html = _read(_root(state) / "index.html")
+    has_beacon = "cloudflareinsights.com/beacon" in html
+    has_token = "data-cf-beacon" in html and "token" in html
+    if not (has_beacon and has_token):
+        return PredicateResult(
+            status="FAIL",
+            message="no analytics beacon — index.html lacks the Cloudflare Web Analytics snippet (beacon + token)",
+            observed_ref="index.html",
+        )
+    return PredicateResult(
+        status="PASS",
+        message="Cloudflare Web Analytics beacon present (visits measured, no cookies)",
+        observed_ref="index.html",
+    )
+
+
 def assert_served_over_valid_https(state: ScenarioState) -> PredicateResult:
     """LIVE-evidence: actually fetch the production site over HTTPS, validating the TLS certificate.
 

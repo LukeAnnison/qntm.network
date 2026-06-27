@@ -30,6 +30,19 @@ backlog:
     test rows wiped. £0, own the data, exportable to any ESP when it's time to send.
     CAP stays partial until verified by the static-evidence runner (add-static-evidence-runner).
   state: passing
+- id: see-add-web-analytics
+  title: '[growth] [see] Add Cloudflare Web Analytics beacon (free, privacy-friendly, no cookies)
+    so visits/sources/referrers are visible — you cannot grow a waitlist you cannot measure.
+    Needs the operator to create the Web Analytics site in the Cloudflare dashboard + paste the
+    (public) beacon token, then wire the snippet into index.html.'
+  driving_capability: visits-are-measured
+  state: scoped
+- id: share-link-preview-cards
+  title: '[growth] [share] Add Open Graph + Twitter card meta and a 1200x630 branded preview image
+    (og.png) so pasting qntm.network into X / iMessage / Slack / LinkedIn unfurls a card, not a bare
+    URL — every share becomes an on-brand advert for the waitlist.'
+  driving_capability: shared-links-render-a-preview
+  state: scoped
 - id: add-static-evidence-runner
   title: '[instrument] [verification] Add a project-local static-evidence runner (scenario
     + qntm_network_checks predicate module) so `flow-trace verify .` runs the state.yaml

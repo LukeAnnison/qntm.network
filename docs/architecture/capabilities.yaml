@@ -71,6 +71,31 @@ capabilities:
   enforcement_depth: 1
   enforcement_surface: 0
   confidence: thin
+- id: shared-links-render-a-preview
+  intent: When someone pastes qntm.network into X, iMessage, Slack, or LinkedIn, the
+    link unfurls into a branded preview card (title, description, image) — not a bare
+    URL — so every share is an on-brand advert for the waitlist. The SHARE half of
+    growth.
+  tier: functional
+  status: working
+  enforced_by:
+  - declared_state: state-link-preview-renders
+    verify: PASS
+  enforcement_depth: 1
+  enforcement_surface: 0
+  confidence: thin
+- id: visits-are-measured
+  intent: The operator can see whether anyone is visiting qntm.network — how many,
+    from where, via which referrer — through a privacy-friendly analytics beacon (no
+    cookies, no banner). The SEE half of growth — you can't grow a waitlist you can't
+    measure.
+  tier: functional
+  status: blocked
+  enforced_by:
+  - declared_state: state-visits-are-measured
+    verify: FAIL
+  enforcement_depth: 1
+  enforcement_surface: 0
 - id: capabilities-have-runtime-enforcers
   intent: The site's claims are checked by a deterministic static-evidence runner
     (curl the live URL for 200 + valid cert; assert index.html carries the viewport
