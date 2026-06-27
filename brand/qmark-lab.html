@@ -74,6 +74,28 @@
   .krow:last-child{border-bottom:none}
   .krow .kv{font-family:var(--mono);font-size:.72rem;color:var(--ink-faint);width:7rem;flex:none}
   .krow .kw{font-family:var(--mono);font-weight:500;font-size:2rem;color:var(--ink)}
+  /* how-to + feedback */
+  .howto{background:var(--panel);border:1px solid var(--acc);border-radius:12px;padding:1.1rem 1.3rem;margin-bottom:1.6rem}
+  .howto h3{font-family:var(--mono);font-size:.74rem;color:var(--acc);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.6rem}
+  .howto ol{margin:0 0 0 1.15rem;color:var(--ink-dim);font-size:.93rem;font-weight:300;line-height:1.75}
+  .howto ol b{color:var(--ink);font-weight:500}
+  .savebtn{font-family:var(--mono);font-size:.78rem;color:#04120a;background:var(--acc);border:none;border-radius:8px;padding:.55rem .8rem;cursor:pointer;font-weight:600;margin-top:.1rem}
+  .savebtn:hover{box-shadow:0 0 18px rgba(63,240,127,.4)}
+  .fb{display:flex;flex-direction:column;gap:1rem}
+  .picks{display:flex;flex-direction:column;gap:.5rem}
+  .pick{display:flex;align-items:center;gap:.8rem;background:#0a0b0a;border:1px solid var(--line);border-radius:10px;padding:.5rem .7rem}
+  .pick svg{width:34px;height:34px;flex:none}
+  .pick .pi{flex:1;min-width:0}
+  .pick .pl{font-family:var(--sans);font-size:.92rem;color:var(--ink);background:transparent;border:none;width:100%;outline:none;padding:0}
+  .pick .pv{font-family:var(--mono);font-size:.68rem;color:var(--ink-faint);margin-top:.1rem}
+  .pick .rm{font-family:var(--mono);font-size:.9rem;color:var(--ink-faint);background:none;border:none;cursor:pointer;flex:none}
+  .pick .rm:hover{color:#ff6b6b}
+  textarea{width:100%;background:#0a0b0a;border:1px solid var(--line-lit);border-radius:10px;color:var(--ink);font-family:var(--mono);font-size:.82rem;padding:.7rem;resize:vertical;line-height:1.5}
+  .fbactions{display:flex;gap:.5rem;flex-wrap:wrap}
+  .fbactions button{font-family:var(--mono);font-size:.78rem;cursor:pointer;border-radius:8px;padding:.5rem .85rem;border:1px solid var(--line-lit);background:var(--panel);color:var(--ink)}
+  .fbactions button.primary{background:var(--acc);color:#04120a;border-color:var(--acc);font-weight:600}
+  .toast{position:fixed;bottom:1.4rem;left:50%;transform:translateX(-50%);background:var(--acc);color:#04120a;font-family:var(--mono);font-size:.8rem;font-weight:600;padding:.6rem 1.1rem;border-radius:8px;opacity:0;transition:opacity .25s;pointer-events:none;z-index:50}
+  .toast.show{opacity:1}
   footer{color:var(--ink-faint);font-family:var(--mono);font-size:.72rem;padding:3rem 0 0}
 </style>
 </head>
@@ -94,6 +116,16 @@
     <p>The chosen direction (gallery options 1 &amp; 3): a ring with an electron at the tail — Q and atom
        at once. Mono. We're tuning three dials: <b>ring thickness</b>, <b>mono luminance</b> (grey → white →
        glow-white), and <b>kerning</b> on the mono wordmark. Drag the sliders, then read off the values below.</p>
+  </div>
+
+  <div class="howto">
+    <h3>How to use this — and send your read back</h3>
+    <ol>
+      <li><b>Shape the mark.</b> Drag the sliders (ring thickness, electron size, glow) and tap the luminance buttons — grey → white → glow white. The big preview updates live.</li>
+      <li><b>Tune the word.</b> The kerning slider tightens or loosens the mono <b>qntm</b> wordmark.</li>
+      <li><b>Save the ones you like.</b> Hit <b>★ Save this version</b> for any combo worth keeping, then give it a name ("bolder, more glow"). Save as many as you want.</li>
+      <li><b>Add notes &amp; send back.</b> Jot comments at the bottom, hit <b>Copy feedback</b>, and paste it into your reply to Luke — he'll lock in whatever you choose. (Your picks are saved in this file, so you can close and come back.)</li>
+    </ol>
   </div>
 
   <!-- LIVE PLAYGROUND -->
@@ -117,6 +149,7 @@
       <div class="ctrl"><label>glow / radiance <span class="v" id="vglow">0.00</span></label><input id="glow" type="range" min="0" max="1" step="0.05" value="0"></div>
       <div class="ctrl"><label>wordmark kerning <span class="v" id="vkern">0.00em</span></label><input id="kern" type="range" min="-0.12" max="0.12" step="0.005" value="0"></div>
       <div class="readout" id="readout"></div>
+      <button class="savebtn" id="savebtn">★ Save this version</button>
     </div>
   </div>
 
@@ -138,8 +171,27 @@
     <div id="kladder"></div>
   </section>
 
-  <footer>qntm · design dept — Q-mark direction lab · dial it in, then tell me the values and I'll lock them into BRAND.md</footer>
+  <!-- PICKS & FEEDBACK -->
+  <section>
+    <div class="sh">your picks · send back to Luke</div>
+    <h2>Picks &amp; feedback</h2>
+    <p class="sd">The versions you saved, plus any comments. When you're done, <b>Copy feedback</b> and paste it
+       into your reply — Luke locks in whatever you choose.</p>
+    <div class="fb">
+      <div class="picks" id="picks"></div>
+      <textarea id="comments" rows="4" placeholder="Comments — proportions, the electron's position on the ring, optical balance, the wordmark relationship, what feels off, anything…"></textarea>
+      <textarea id="fbout" rows="9" readonly aria-label="feedback to copy"></textarea>
+      <div class="fbactions">
+        <button class="primary" id="copybtn">📋 Copy feedback</button>
+        <button id="dlbtn">⬇ Download .txt</button>
+        <button id="clearbtn">clear picks</button>
+      </div>
+    </div>
+  </section>
+
+  <footer>qntm · design dept — Q-mark direction lab · save your picks above, add notes, and Copy feedback to send back to Luke</footer>
 </main>
+<div class="toast" id="toast"></div>
 
 <script>
   const root = document.documentElement.style;
@@ -189,6 +241,65 @@
     `<div class="krow"><span class="kv">${k>0?'+':''}${k.toFixed(3)}em</span><span class="kw" style="letter-spacing:${k}em">qntm</span></div>`).join('');
 
   refresh();
+
+  // ---- picks & feedback (save / name / send back) ----
+  const PICKS_KEY='qntm-qmark-picks', CMT_KEY='qntm-qmark-comments';
+  let picks = [];
+  try { picks = JSON.parse(localStorage.getItem(PICKS_KEY) || '[]'); } catch(e){ picks = []; }
+  try { $('comments').value = localStorage.getItem(CMT_KEY) || ''; } catch(e){}
+
+  function curState(){
+    const treat = document.querySelector('#treat button[aria-pressed="true"]');
+    return { thick:+$('thick').value, er:+$('er').value, glow:+$('glow').value, kern:+$('kern').value,
+             mc:getComputedStyle(document.documentElement).getPropertyValue('--mc').trim(),
+             treat: treat ? treat.textContent : '', label:'' };
+  }
+  function fmt(s){ return `ring ${s.thick.toFixed(1)} · electron ${s.er.toFixed(1)} · glow ${s.glow.toFixed(2)} · kern ${s.kern.toFixed(3)}em · ${s.treat}`; }
+  function pickSvg(s){
+    const dot = s.glow>0 ? `filter:drop-shadow(0 0 ${s.glow*5}px ${s.mc})` : '';
+    const rg  = s.glow>0 ? `filter:drop-shadow(0 0 ${s.glow*3}px ${s.mc})` : '';
+    return `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="30" fill="none" stroke="${s.mc}" stroke-width="${s.thick}" style="${rg}"/><circle cx="71" cy="71" r="${s.er}" fill="${s.mc}" style="${dot}"/></svg>`;
+  }
+  function persist(){
+    try { localStorage.setItem(PICKS_KEY, JSON.stringify(picks)); localStorage.setItem(CMT_KEY, $('comments').value); } catch(e){}
+    buildFb();
+  }
+  function buildFb(){
+    let t = 'qntm Q-mark — feedback\n=======================\n\n';
+    if (picks.length){ t += 'Saved picks:\n'; picks.forEach((s,i)=>{ t += `${i+1}. ${s.label ? '"'+s.label+'"  ' : ''}${fmt(s)}\n`; }); t += '\n'; }
+    else t += '(no saved picks yet)\n\n';
+    const c = $('comments').value.trim();
+    t += 'Comments:\n' + (c || '(none)') + '\n';
+    $('fbout').value = t;
+  }
+  function render(){
+    if (!picks.length){
+      $('picks').innerHTML = '<div style="color:var(--ink-faint);font-family:var(--mono);font-size:.8rem">No picks yet — shape a mark and hit ★ Save this version.</div>';
+    } else {
+      $('picks').innerHTML = picks.map((s,i)=>
+        `<div class="pick">${pickSvg(s)}<div class="pi"><input class="pl" data-i="${i}" placeholder="name this one…" value="${(s.label||'').replace(/"/g,'&quot;')}"><div class="pv">${fmt(s)}</div></div><button class="rm" data-rm="${i}" title="remove">✕</button></div>`
+      ).join('');
+      document.querySelectorAll('.pl').forEach(inp => inp.addEventListener('input', e => { picks[+e.target.dataset.i].label = e.target.value; persist(); }));
+      document.querySelectorAll('.rm').forEach(b => b.addEventListener('click', e => { picks.splice(+e.target.dataset.rm,1); persist(); render(); }));
+    }
+    buildFb();
+  }
+  function toast(m){ const el=$('toast'); el.textContent=m; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 2400); }
+
+  $('savebtn').addEventListener('click', ()=>{ picks.push(curState()); persist(); render(); toast('Saved ✓ — name it below'); });
+  $('comments').addEventListener('input', persist);
+  $('copybtn').addEventListener('click', async ()=>{
+    const txt = $('fbout').value;
+    try { await navigator.clipboard.writeText(txt); toast('Copied — paste into your reply to Luke'); }
+    catch(e){ $('fbout').focus(); $('fbout').select(); try{ document.execCommand('copy'); toast('Copied — paste into your reply'); }catch(_){ toast('Select the text box & press ⌘C / Ctrl-C'); } }
+  });
+  $('dlbtn').addEventListener('click', ()=>{
+    const blob = new Blob([$('fbout').value], {type:'text/plain'});
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'qntm-qmark-feedback.txt'; a.click();
+  });
+  $('clearbtn').addEventListener('click', ()=>{ if(confirm('Clear all saved picks?')){ picks=[]; persist(); render(); } });
+
+  render();
 </script>
 </body>
 </html>
