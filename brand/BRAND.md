@@ -80,12 +80,21 @@ filter) is the signature — strongest on black.
   to pair with it (a Google-style wordmark↔reduced-mark system). Tooling decided: **SVG/code, no
   image model, £0** — logos are vector, which is exactly the code surface. Image-gen models are a
   *separate, later* frontier (raster/illustration), not needed for marks.
+- 2026-06-27 — **DIRECTION CONFIRMED** (operator + design-trained advisor / his dad). The icon mark is
+  the **Q = ring + electron** (gallery #qmark options 1 "ring + electron" and 3 "minimal" — i.e. a
+  circular ring with one electron at the tail). **Literal Q wins over pure atom/node.** Treatment is
+  **MONO** (ring + electron one colour). Now tuning three dials in `qmark-lab.html`: (1) ring
+  **thickness** (bold↔hairline), (2) **mono luminance** grey → white → glow-white (radiance), (3)
+  naturalised **kerning** on the mono wordmark (mono normally doesn't kern; we borrow the feel via
+  letter-spacing). Next: read off the chosen values from the lab and log them here, then it's THE mark.
 
 ## 5. Open questions
 
-- Does the icon mark want to be a literal **Q**, or a pure **atom/node** that doesn't spell anything?
-- One electron or several? Orbit circular or elliptical (more "atom")?
-- How much glow is "us" vs too much?
+- ~~Literal **Q** vs pure **atom/node**?~~ → **RESOLVED: literal Q (ring + electron).**
+- ~~One electron or several?~~ → **RESOLVED: one electron.**
+- Exact **ring thickness**? (tuning in the lab — bold vs hairline)
+- Exact **mono luminance**? grey / white / glow-white — and how much glow is "us" vs too much?
+- Exact **wordmark kerning** value? (mono, naturalised)
 - Lowercase `qntm` forever, or is there a caps treatment for some contexts?
 
 ## 6. How this department works (so a future session continues)
