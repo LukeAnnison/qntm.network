@@ -22,13 +22,13 @@ backlog:
     exportable list. Light-touch now (a hosted form endpoint), productionizable later
     (own list + double opt-in).'
   driving_capability: captures-and-persists-email-signups
-  record: 2026-06-27 — SHIPPED. Built ourselves (build-vs-buy diagnose: capture is trivial,
-    deliverability/sending is the hard part we defer + rent later). Cloudflare Worker
-    (worker/src/index.js) -> D1 'qntm-signups' DB; dedup, email validation, honeypot, CORS,
-    operator CSV export at /export?key=. Both forms POST to it with success UI. Tested
-    end-to-end (valid/dedup/invalid/honeypot/export all pass); test rows wiped. £0, own the
-    data, exportable to any ESP when it's time to send. CAP stays partial until verified by
-    the static-evidence runner (add-static-evidence-runner).
+  record: 2026-06-27 — SHIPPED. Built ourselves (build-vs-buy diagnose — capture is
+    trivial, deliverability/sending is the hard part we defer + rent later). Cloudflare
+    Worker (worker/src/index.js) -> D1 'qntm-signups' DB; dedup, email validation,
+    honeypot, CORS, operator CSV export at /export?key=. Both forms POST to it with
+    success UI. Tested end-to-end (valid/dedup/invalid/honeypot/export all pass);
+    test rows wiped. £0, own the data, exportable to any ESP when it's time to send.
+    CAP stays partial until verified by the static-evidence runner (add-static-evidence-runner).
   state: passing
 - id: add-static-evidence-runner
   title: '[instrument] [verification] Add a project-local static-evidence runner (scenario
@@ -36,6 +36,10 @@ backlog:
     invariants for real — flipping the built capabilities from observed-thin to genuinely
     green. Mirrors how trace-orchestration earned its static greens.'
   driving_capability: capabilities-have-runtime-enforcers
-  record: The forward-thinking / industrialization step. Until this lands, the whole
-    board is DECLARED-tier evidence (honest, but unverified at runtime).
-  state: diagnose-ready
+  record: 2026-06-27 — SHIPPED. Built the static-evidence runner — scenario (tests/flow_scenarios/static_evidence.py)
+    + predicate module (qntm_network_checks.py) with 7 deterministic checks over the
+    repo artifacts + one live HTTPS probe. `flow-trace verify .` runs them → 7/7 PASS;
+    ALL capabilities flipped working (W0→W7). Predicates mutation-proven (FAIL on
+    broken artifacts, PASS on real). Tier = static-evidence (the honest ceiling for
+    a no-runtime static site; 'weak' = not cycle-exercising, which is correct here).
+  state: passing

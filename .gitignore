@@ -2,3 +2,5 @@ node_modules/
 .DS_Store
 *.unused
 docs/architecture/derived-flows.yaml
+__pycache__/
+*.pyc

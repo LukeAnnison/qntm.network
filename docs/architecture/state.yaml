@@ -18,7 +18,7 @@ state_invariants:
     evidence_tier: static
     predicate: qntm_network_checks:assert_landing_page_present
     scenarios: "static_evidence"
-    wired: false
+    wired: true
     gates_capabilities: [landing-page-renders]
 
   - id: state-served-over-valid-https
@@ -31,7 +31,7 @@ state_invariants:
     evidence_tier: static
     predicate: qntm_network_checks:assert_served_over_valid_https
     scenarios: "static_evidence"
-    wired: false
+    wired: true
     gates_capabilities: [served-securely-over-https]
 
   - id: state-deploy-is-push-to-publish
@@ -43,7 +43,7 @@ state_invariants:
     evidence_tier: static
     predicate: qntm_network_checks:assert_deploy_is_push_to_publish
     scenarios: "static_evidence"
-    wired: false
+    wired: true
     gates_capabilities: [push-to-deploy-loop]
 
   - id: state-responsive-meta-present
@@ -55,7 +55,7 @@ state_invariants:
     evidence_tier: static
     predicate: qntm_network_checks:assert_responsive_meta_present
     scenarios: "static_evidence"
-    wired: false
+    wired: true
     gates_capabilities: [responsive-across-devices]
 
   - id: state-signature-interactions-present
@@ -68,7 +68,7 @@ state_invariants:
     evidence_tier: static
     predicate: qntm_network_checks:assert_signature_interactions_present
     scenarios: "static_evidence"
-    wired: false
+    wired: true
     gates_capabilities: [signature-interactions-embody-the-thesis]
 
   - id: state-email-signups-persisted
@@ -81,7 +81,7 @@ state_invariants:
     evidence_tier: static
     predicate: qntm_network_checks:assert_email_signups_persisted
     scenarios: "static_evidence"
-    wired: false
+    wired: true
     gates_capabilities: [captures-and-persists-email-signups]
 
   - id: state-capabilities-have-runtime-enforcers
@@ -94,5 +94,5 @@ state_invariants:
     evidence_tier: static
     predicate: qntm_network_checks:assert_static_evidence_runner_wired
     scenarios: "static_evidence"
-    wired: false
+    wired: true
     gates_capabilities: [capabilities-have-runtime-enforcers]

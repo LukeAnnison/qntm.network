@@ -4,67 +4,73 @@ capabilities:
     of least resistance"), the three acts, the creed, and a way to leave their email
     — the whole story in one scroll.
   tier: foundational
-  status: partial
+  status: working
   enforced_by:
   - declared_state: state-landing-page-present
-    verify: UNVERIFIABLE
+    verify: PASS
   enforcement_depth: 1
   enforcement_surface: 0
+  confidence: thin
 - id: served-securely-over-https
   intent: Every visitor reaches the site over a valid HTTPS certificate (CN=qntm.network,
     Let's Encrypt) with http→https redirect and www→apex — no security warning by
     any route.
   tier: foundational
-  status: partial
+  status: working
   enforced_by:
   - declared_state: state-served-over-valid-https
-    verify: UNVERIFIABLE
+    verify: PASS
   enforcement_depth: 1
   enforcement_surface: 0
+  confidence: thin
 - id: push-to-deploy-loop
   intent: The operator changes the site by editing index.html and running `git push`
     — live on qntm.network in under a minute, no separate build or upload step. The
     path of least resistance for iteration itself.
   tier: functional
-  status: partial
+  status: working
   enforced_by:
   - declared_state: state-deploy-is-push-to-publish
-    verify: UNVERIFIABLE
+    verify: PASS
   enforcement_depth: 1
   enforcement_surface: 0
+  confidence: thin
 - id: responsive-across-devices
   intent: The page is legible and well-composed on desktop and mobile — the hero,
     the scattered creed, and the forms reflow to a clean single column on small screens.
   tier: non-functional
-  status: partial
+  status: working
   enforced_by:
   - declared_state: state-responsive-meta-present
-    verify: UNVERIFIABLE
+    verify: PASS
   enforcement_depth: 1
   enforcement_surface: 0
+  confidence: thin
 - id: signature-interactions-embody-the-thesis
   intent: The interactions on the page ARE the message — a glowing cursor, headline
     letters that part around the pointer and spring back (path of least resistance
     made physical), and a creed that scatters across the canvas like a node graph.
   tier: functional
-  status: partial
+  status: working
   enforced_by:
   - declared_state: state-signature-interactions-present
-    verify: UNVERIFIABLE
+    verify: PASS
   enforcement_depth: 1
   enforcement_surface: 0
+  confidence: thin
 - id: captures-and-persists-email-signups
   intent: A visitor who submits the "request access" form has their email actually
     CAPTURED and persisted to a durable list the operator can retrieve and export
     — today the form is a no-op (onsubmit does nothing). The immediate next capability
     to drive.
   tier: foundational
-  status: partial
+  status: working
   enforced_by:
   - declared_state: state-email-signups-persisted
-    verify: UNVERIFIABLE
+    verify: PASS
   enforcement_depth: 1
   enforcement_surface: 0
+  confidence: thin
 - id: capabilities-have-runtime-enforcers
   intent: The site's claims are checked by a deterministic static-evidence runner
     (curl the live URL for 200 + valid cert; assert index.html carries the viewport
@@ -72,9 +78,10 @@ capabilities:
     and the built capabilities above earn genuine greens instead of observed-only
     thin confidence. The industrialization step.
   tier: non-functional
-  status: partial
+  status: working
   enforced_by:
   - declared_state: state-capabilities-have-runtime-enforcers
-    verify: UNVERIFIABLE
+    verify: PASS
   enforcement_depth: 1
   enforcement_surface: 0
+  confidence: thin
