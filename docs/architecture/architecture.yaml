@@ -1,0 +1,43 @@
+# qntm.network — architecture.yaml (the authored blueprint).
+#
+# HONEST SCOPE: a static landing site — no traced CODE, so the capture/coverage half
+# (classes / packages / observed flows) is N/A. The state invariants in state.yaml are the
+# candidate runtime (static-evidence), declared now and WIRED later (capabilities-have-runtime-
+# enforcers). Until wired they are unverified — principles cite them, caps stay observed-thin.
+
+type_catalogue: [capability, principle, state]   # no flow/forbidden_flow/sink — no traced code
+
+files:
+  capabilities: capabilities.yaml   # the apex breadth (visitor/operator-can statements, tiered)
+  state: state.yaml                 # the structurally-checkable invariants (candidate enforcers)
+  # backlog + handoff live in docs/implementation-artifacts/ (canonical)
+
+ordering: capability-driven   # the queue derives from capability tier x status; `lead` is the only knob
+
+# ── Authored meta-rules (the spine) ────────────────────────────────────────────────────────
+principles:
+
+  - id: path-of-least-resistance
+    rule: >
+      The site makes the next thing legible and the path to it the shortest one — for the VISITOR
+      (understand qntm and leave an email in a single scroll) and for the OPERATOR (edit -> push ->
+      live in under a minute). Friction on either path is the bug to remove.
+    enforced_by:
+      - state.yaml#state-deploy-is-push-to-publish
+      - state.yaml#state-email-signups-persisted
+
+  - id: secure-and-live-by-default
+    rule: >
+      qntm.network is reachable and served over a valid HTTPS certificate with http->https and
+      www->apex redirects; no visitor ever sees a security warning, by any route they arrive.
+    enforced_by:
+      - state.yaml#state-served-over-valid-https
+
+  - id: declared-before-enforced
+    rule: >
+      Every capability is DECLARED before it is built and earns a real green only when a
+      deterministic enforcer (a static-evidence check) PASSES. Until the static-evidence runner
+      exists (capabilities-have-runtime-enforcers), built capabilities sit observed-working with
+      thin confidence — honest, never fake-green.
+    enforced_by:
+      - state.yaml#state-capabilities-have-runtime-enforcers

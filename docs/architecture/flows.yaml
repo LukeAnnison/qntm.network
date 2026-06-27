@@ -1,0 +1,11 @@
+# qntm.network — flows.yaml (intentionally empty).
+#
+# This project has NO traced runtime (a static landing site), so there are no expected or
+# forbidden CALL flows to declare — the observed-side contract is N/A here. The file exists only
+# because flow-trace's declaration loader expects it; the LOAD-BEARING declarations for this
+# project are capabilities.yaml + state.yaml (the declared side the derivers read). If the site
+# ever grows a checkable runtime (the static-evidence runner — capabilities-have-runtime-enforcers),
+# its checks land in state.yaml, not here.
+
+expected_flows: []
+forbidden_flows: []

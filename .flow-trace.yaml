@@ -1,0 +1,28 @@
+# qntm.network — .flow-trace.yaml (self-application config).
+#
+# A STATIC landing site: no traced code, no Python runtime. Instrumented DECLARATION-ONLY for
+# now — capabilities / architecture / state / backlog declared in the canonical flow-trace layout
+# so the global registry (~/.flow-trace/registry.yaml) and the /trace workflow can read it and
+# derive a board. Evidence tier TODAY = DECLARED/OBSERVED (a human watched the site render, curled
+# the cert) — NOT runtime-verified. That is honest, not fake-green: the built capabilities carry
+# `confidence: thin` and no passing enforcer.
+#
+# INDUSTRIALIZATION PATH (the forward-thinking half): add a static-evidence runner — a project-local
+# scenario + deterministic predicates (curl https://qntm.network → 200 + valid cert; assert index.html
+# carries the viewport meta + the signature interactions; assert the deploy is push-to-publish) that
+# `flow-trace verify .` / `map .` RUN to produce real PASS/FAIL. Driven by the capability
+# `capabilities-have-runtime-enforcers`. Mirrors how trace-orchestration earned its static greens.
+#
+# Read it like anywhere (cheap reads work without a runtime):
+#   flow-trace capability-rollup .   # caps -> working / partial / undeclared, H-rooted, drift
+#   flow-trace queue .               # the derived work queue (actionable / diagnose-ready / pool)
+#   flow-trace backlog .             # the rows x driving_capability
+#   flow-trace map-registry          # this project as one member of the cross-project board
+
+ordering: capability-driven
+
+# No pyproject/runtime to derive a capture-module filter from — pin an explicit, never-matching
+# include so the loader resolves cleanly (the no-traced-code pattern, per trace-orchestration).
+modules:
+  include:
+    - qntm_network._no_capture

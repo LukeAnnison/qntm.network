@@ -1,0 +1,31 @@
+# qntm.network handoff — the forward record for the static landing site.
+# INSTRUMENTED 2026-06-27: registered as a flow-trace member, so queue + backlog + capability-
+# rollup are DERIVED. No traced RUNTIME yet (static site) — the OBSERVED-side gate (map's verified
+# fan) is N/A until the static-evidence runner lands (capabilities-have-runtime-enforcers). The
+# DECLARED-side derivers (capability-rollup / backlog / queue) are live. Durable pins live in
+# capabilities.yaml (the breadth) + backlog.yaml rows; threads here POINT, they do not restate.
+handoff:
+  project_target: qntm-network            # GATE-TARGET field
+  date: 2026-06-27
+  commit: null                            # self-ref SHA set at first instrumented close
+
+  bootstrap:                              # the runnable onboarding block
+    # flow-trace is invoked via its venv binary (not on PATH). The declared-side derivers
+    # (capability-rollup / backlog / queue) read the yamls directly — no project runtime needed.
+    invoke: /Users/lukeannison/projects/qntm/tools/agentic-dev/flow-trace/.venv/bin/flow-trace
+    yaml_dir: docs/implementation-artifacts
+    next_command: /Users/lukeannison/projects/qntm/tools/agentic-dev/flow-trace/.venv/bin/flow-trace map .  # DERIVED by flow_trace.prioritization.derive_next_command in the SAME reconcile_queue pass as `queue:` — do not hand-edit (bootstrap-next-command-is-derived-not-typed).
+
+  queue:  # DERIVED by flow_trace.prioritization.derive_queue — the authored override is the `lead` flag in backlog.yaml; do not hand-edit (prioritization-is-derived-not-typed).
+  - id: wire-real-email-capture
+  - id: add-static-evidence-runner
+
+  qualitative:
+  - thread: instrumented-2026-06-27
+    note: >
+      First flow-trace instrumentation of qntm.network. The site is LIVE + SECURE (see backlog
+      rows launch-coming-soon-site, secure-with-https — both passing). Five built capabilities are
+      observed-working with thin confidence (no runtime verifier yet). Two capabilities are the
+      work to drive: captures-and-persists-email-signups (the form is a no-op) and
+      capabilities-have-runtime-enforcers (add the static-evidence runner). Evidence tier today is
+      DECLARED — honest, not fake-green.

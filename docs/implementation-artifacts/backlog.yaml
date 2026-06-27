@@ -1,0 +1,37 @@
+backlog:
+- id: launch-coming-soon-site
+  title: '[launch] Ship the qntm.network coming-soon landing page — brand, thesis,
+    three acts, creed, email form — on GitHub Pages from the recently-authored HTML,
+    wired to a push-to- publish deploy loop.'
+  driving_capability: landing-page-renders
+  record: 2026-06-26 — pulled ph/qntm-landing.html into a git project, pushed to LukeAnnison/
+    qntm.network, enabled Pages + custom domain, added 5 Squarespace DNS records.
+    Live at HTTP 200.
+  state: passing
+- id: secure-with-https
+  title: '[launch] [secure] Make qntm.network serve over a valid TLS cert with http->https
+    and www->apex redirects so no visitor sees a security warning.'
+  driving_capability: served-securely-over-https
+  record: 2026-06-26 — cert initially stalled (GitHub served *.github.io); fixed by
+    toggling the custom domain (CNAME file) to re-trigger Let's Encrypt; enabled https_enforced.
+    Verified 🔒.
+  state: passing
+- id: wire-real-email-capture
+  title: '[feature] [email] Replace the no-op request-access form with a real capture
+    backend (e.g. Buttondown / Formspree) so a submitted email is persisted to a durable,
+    exportable list. Light-touch now (a hosted form endpoint), productionizable later
+    (own list + double opt-in).'
+  driving_capability: captures-and-persists-email-signups
+  record: The form currently has onsubmit="return false;" — it looks real but captures
+    nothing. The immediate next capability to drive. Service choice is the first decision
+    fork.
+  state: diagnose-ready
+- id: add-static-evidence-runner
+  title: '[instrument] [verification] Add a project-local static-evidence runner (scenario
+    + qntm_network_checks predicate module) so `flow-trace verify .` runs the state.yaml
+    invariants for real — flipping the built capabilities from observed-thin to genuinely
+    green. Mirrors how trace-orchestration earned its static greens.'
+  driving_capability: capabilities-have-runtime-enforcers
+  record: The forward-thinking / industrialization step. Until this lands, the whole
+    board is DECLARED-tier evidence (honest, but unverified at runtime).
+  state: diagnose-ready
