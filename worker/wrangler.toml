@@ -1,0 +1,14 @@
+# Cloudflare Worker — qntm.network signup capture endpoint.
+# Deployed to Cloudflare (NOT GitHub Pages — Pages serves the static site; this is the backend).
+# database_id is filled in after `wrangler d1 create qntm-signups`.
+name = "qntm-signups"
+main = "src/index.js"
+compatibility_date = "2026-06-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "qntm-signups"
+database_id = "fba2e9e9-7e6d-4fa5-932a-219fe35807ac"
+
+[observability]
+enabled = true

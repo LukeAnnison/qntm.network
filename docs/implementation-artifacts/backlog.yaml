@@ -22,10 +22,14 @@ backlog:
     exportable list. Light-touch now (a hosted form endpoint), productionizable later
     (own list + double opt-in).'
   driving_capability: captures-and-persists-email-signups
-  record: The form currently has onsubmit="return false;" — it looks real but captures
-    nothing. The immediate next capability to drive. Service choice is the first decision
-    fork.
-  state: diagnose-ready
+  record: 2026-06-27 — SHIPPED. Built ourselves (build-vs-buy diagnose: capture is trivial,
+    deliverability/sending is the hard part we defer + rent later). Cloudflare Worker
+    (worker/src/index.js) -> D1 'qntm-signups' DB; dedup, email validation, honeypot, CORS,
+    operator CSV export at /export?key=. Both forms POST to it with success UI. Tested
+    end-to-end (valid/dedup/invalid/honeypot/export all pass); test rows wiped. £0, own the
+    data, exportable to any ESP when it's time to send. CAP stays partial until verified by
+    the static-evidence runner (add-static-evidence-runner).
+  state: passing
 - id: add-static-evidence-runner
   title: '[instrument] [verification] Add a project-local static-evidence runner (scenario
     + qntm_network_checks predicate module) so `flow-trace verify .` runs the state.yaml

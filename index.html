@@ -130,6 +130,9 @@
   }
   .access button:hover { box-shadow: 0 0 32px var(--acc-glow); transform: translateY(-1px); }
   .access-note { font-family: var(--mono); font-size: 0.72rem; color: var(--ink-faint); margin-top: 0.9rem; letter-spacing: 0.04em; }
+  .access .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+  .access .sent { font-family: var(--mono); font-size: 0.92rem; color: var(--acc); letter-spacing: 0.02em; padding: 0.5rem 0; }
+  .access button:disabled { opacity: 0.6; cursor: default; }
 
   .scroll-hint {
     position: absolute; bottom: 2.2rem; left: clamp(1.5rem, 6vw, 7rem);
@@ -250,7 +253,8 @@
       to it, the shortest one.
     </p>
     <form class="access" onsubmit="return false;">
-      <input type="email" placeholder="you@email.com" aria-label="email" />
+      <input type="email" name="email" placeholder="you@email.com" aria-label="email" required />
+      <input type="text" name="company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
       <button type="submit">Request access →</button>
     </form>
     <div class="access-note">A personal operating system. Building in the open. One message, when it's ready.</div>
@@ -328,7 +332,8 @@
     <h2 class="repel">The path of <span class="g">least resistance.</span></h2>
     <p>Nothing here requires urgency. The work is slow, grounded, earned through use. But you can be early.</p>
     <form class="access" onsubmit="return false;">
-      <input type="email" placeholder="you@email.com" aria-label="email" />
+      <input type="email" name="email" placeholder="you@email.com" aria-label="email" required />
+      <input type="text" name="company" class="hp" tabindex="-1" autocomplete="off" aria-hidden="true" />
       <button type="submit">Request access →</button>
     </form>
     <div class="access-note">No noise. One message, when the doors open.</div>
@@ -478,6 +483,42 @@
       }
       requestAnimationFrame(tick);
     })();
+  })();
+
+  // ---- signup capture (POST to the Cloudflare Worker → D1) ----
+  (function () {
+    const ENDPOINT = 'https://qntm-signups.lukeannison.workers.dev';
+    document.querySelectorAll('form.access').forEach((form) => {
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = (form.querySelector('input[type="email"]')?.value || '').trim();
+        const company = form.querySelector('input[name="company"]')?.value || ''; // honeypot
+        const btn = form.querySelector('button');
+        const note = form.parentElement.querySelector('.access-note');
+        if (!email) return;
+        const label = btn.textContent;
+        btn.disabled = true; btn.textContent = 'sending…';
+        const source = (form.closest('[id]') && form.closest('[id]').id) || 'landing';
+        try {
+          const res = await fetch(ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, company, source }),
+          });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.ok) {
+            form.innerHTML = '<div class="sent">✓ You\'re on the list. One message, when it\'s ready.</div>';
+          } else {
+            btn.disabled = false; btn.textContent = label;
+            if (note) note.textContent = data.error === 'invalid email'
+              ? "That email doesn't look right — try again." : 'Something went wrong — try again.';
+          }
+        } catch (_) {
+          btn.disabled = false; btn.textContent = label;
+          if (note) note.textContent = 'Network hiccup — try again.';
+        }
+      });
+    });
   })();
 </script>
 </body>

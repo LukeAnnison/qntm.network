@@ -1,0 +1,14 @@
+{
+  "name": "qntm-signups-worker",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Cloudflare Worker — qntm.network signup capture (D1-backed)",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^4"
+  }
+}
