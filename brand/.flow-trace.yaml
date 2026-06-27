@@ -1,0 +1,16 @@
+# qntm-brand — the design department, instrumented as its own flow-trace member.
+#
+# Process/asset capabilities carry static-evidence enforcers (brief exists, gallery explores the
+# suite, design language declared, wordmark present). Aesthetic-DECISION capabilities (which icon
+# mark is canonical, final lockups) carry NO enforcer — they are human decisions, not falsifiable
+# checks, so they sit declared/pool until settled. That mix IS the suite-completeness matrix.
+#
+#   flow-trace verify .          # runs the brand static-evidence checks (assets → real PASS/FAIL)
+#   flow-trace capability-rollup . # the suite matrix: filled (working) vs open (pool)
+#   flow-trace queue .           # the open design decisions/work to drive
+
+ordering: capability-driven
+
+modules:
+  include:
+    - qntm_brand._no_capture   # no traced runtime; never-matching capture filter

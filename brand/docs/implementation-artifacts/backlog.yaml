@@ -1,0 +1,43 @@
+backlog:
+
+# ── done (assets shipped) ──────────────────────────────────────────────────────────────────
+- id: write-the-brand-brief
+  title: '[brand] [brief] Write BRAND.md — pin qntm''s meaning, the logo taxonomy, current assets
+    mapped, decisions log, open questions. The framework that survives sessions.'
+  driving_capability: has-a-brand-brief
+  record: 2026-06-27 — shipped. BRAND.md holds the thesis + taxonomy + assets + decisions log.
+  state: passing
+
+- id: build-the-concept-gallery
+  title: '[brand] [gallery] Build brand/index.html — a browsable concept board across wordmark /
+    Q-mark / atom / lockups / app-icon, with a black/white/green surface toggle and labelled tiles.'
+  driving_capability: browsable-concept-gallery
+  record: 2026-06-27 — shipped. ~19 concept tiles, surface toggle, every tile labelled by type.
+  state: passing
+
+# ── open — the design decisions/work to drive ──────────────────────────────────────────────
+- id: settle-the-icon-mark
+  title: '[brand] [decision] Choose THE canonical icon mark from the gallery front-runners (the
+    Q-as-atom directions) — the reduced mark that pairs with the wordmark. A human call, not a check;
+    review the gallery, pick, log the decision in BRAND.md.'
+  driving_capability: icon-mark-is-chosen
+  record: The headline open decision. Front-runners live in the gallery #qmark section. Pool until settled.
+  state: diagnose-ready
+
+- id: finalise-the-lockup-suite
+  title: '[brand] Finalise the combination lockups (horizontal / stacked / mono / tagline) once the
+    icon mark is chosen — depends on settle-the-icon-mark.'
+  driving_capability: lockup-suite-finalised
+  state: scoped
+
+- id: ship-favicon-and-app-icon
+  title: '[brand] Export the chosen icon mark and wire it into qntm.network as a favicon + app icon
+    (legible to 16px) — the decision made real on the site.'
+  driving_capability: favicon-and-app-icon-shipped
+  state: scoped
+
+- id: document-the-brand-system
+  title: '[brand] Document usage rules + tokens (clear-space, min-size, colour roles, do/don''t) so
+    the identity is reusable without re-deciding it.'
+  driving_capability: brand-system-documented-for-reuse
+  state: scoped

@@ -1,0 +1,35 @@
+# qntm-brand — architecture.yaml (the design department's blueprint).
+# No traced code — the state invariants (static-evidence over BRAND.md + index.html) are the runtime.
+
+type_catalogue: [capability, principle, state]
+
+files:
+  capabilities: capabilities.yaml
+  state: state.yaml
+
+ordering: capability-driven
+
+principles:
+
+  - id: brand-carries-the-thesis
+    rule: >
+      Every mark must carry qntm's meaning — the smallest identifiable thing (precision, the leverage
+      point / electron) and quantification (units, structure). Decoration that does not carry the
+      thesis is noise.
+    enforced_by:
+      - state.yaml#state-brief-present
+
+  - id: refine-dont-replace
+    rule: >
+      The existing wordmark (the glowing dot + qntm) is already stampable; explore around it and
+      prefer evolution. The real gap is the ICON mark, not the word.
+    enforced_by:
+      - state.yaml#state-gallery-present
+
+  - id: design-pins-are-frameworks-not-only-enforcers
+    rule: >
+      Design governance pins categories + rationale + DECISIONS, which are not all falsifiable.
+      Process/asset capabilities earn static-evidence greens; aesthetic-DECISION capabilities stay
+      declared (pool) until a human settles them — honest, never a fake green on taste.
+    enforced_by:
+      - state.yaml#state-brief-present

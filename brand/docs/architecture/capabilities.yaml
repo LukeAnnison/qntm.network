@@ -1,0 +1,80 @@
+capabilities:
+- id: has-a-brand-brief
+  intent: The department has a durable brief (BRAND.md) pinning what qntm means, the
+    logo taxonomy, the current assets mapped, a decisions log, and the open questions
+    — so any session picks up cold.
+  tier: foundational
+  status: working
+  enforced_by:
+  - declared_state: state-brief-present
+    verify: PASS
+  enforcement_depth: 1
+  enforcement_surface: 0
+  confidence: thin
+- id: browsable-concept-gallery
+  intent: A browsable gallery (index.html) lets the operator flick through every category
+    (wordmark / Q-mark / atom / lockups / app-icon) across surfaces (black/white/green),
+    each tile labelled by type — the play surface where directions are explored and
+    reacted to.
+  tier: foundational
+  status: working
+  enforced_by:
+  - declared_state: state-gallery-present
+    verify: PASS
+  enforcement_depth: 1
+  enforcement_surface: 0
+  confidence: thin
+- id: coherent-design-language
+  intent: A portable kit is declared — quantum green (#3ff07f), Inter + JetBrains
+    Mono, and the glow/radiance signature + dot device — reusable everywhere, the
+    thing that makes a brand not just a logo.
+  tier: functional
+  status: working
+  enforced_by:
+  - declared_state: state-design-language-declared
+    verify: PASS
+  enforcement_depth: 1
+  enforcement_surface: 0
+  confidence: thin
+- id: wordmark-exists
+  intent: The wordmark (the glowing dot + qntm) exists and is stampable — the asset
+    the rest refines around.
+  tier: functional
+  status: working
+  enforced_by:
+  - declared_state: state-wordmark-present
+    verify: PASS
+  enforcement_depth: 1
+  enforcement_surface: 0
+  confidence: thin
+- id: icon-mark-is-chosen
+  intent: A SINGLE icon mark (the Q-as-atom front-runner) is SELECTED as canonical
+    — the reduced mark that pairs with the wordmark (the Google-style wordmark↔mark
+    system). The headline open decision; a human call from the gallery, not a check.
+  tier: foundational
+  status: undeclared
+  enforcement_depth: 0
+  enforcement_surface: 0
+- id: lockup-suite-finalised
+  intent: The combination lockups (horizontal, stacked, mono, with/without tagline)
+    are finalised once the icon mark is chosen — the official ways mark + wordmark
+    sit together.
+  tier: functional
+  status: undeclared
+  enforcement_depth: 0
+  enforcement_surface: 0
+- id: favicon-and-app-icon-shipped
+  intent: The chosen icon mark is exported and WIRED into the site as a favicon +
+    app icon (the reduced mark, legible to 16px) — the decision made real on qntm.network.
+  tier: functional
+  status: undeclared
+  enforcement_depth: 0
+  enforcement_surface: 0
+- id: brand-system-documented-for-reuse
+  intent: Usage rules + tokens (clear-space, min-size, do/don't, colour roles) are
+    documented so the identity is reusable by anyone/anything without re-deciding
+    it each time.
+  tier: non-functional
+  status: undeclared
+  enforcement_depth: 0
+  enforcement_surface: 0

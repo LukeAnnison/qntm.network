@@ -1,0 +1,4 @@
+# qntm-brand — flows.yaml (intentionally empty). No traced runtime; the state invariants
+# (static-evidence over BRAND.md + index.html) are the runtime. Required stub for the loader.
+expected_flows: []
+forbidden_flows: []

@@ -1,0 +1,28 @@
+# qntm-brand handoff — the design department's forward record.
+# Instrumented 2026-06-27. No traced runtime (design); static-evidence over BRAND.md + index.html.
+# Durable framework lives in BRAND.md; the gallery is the play surface; this points, does not restate.
+handoff:
+  project_target: qntm-brand
+  date: 2026-06-27
+  commit: null
+
+  bootstrap:
+    invoke: /Users/lukeannison/projects/qntm/tools/agentic-dev/flow-trace/.venv/bin/flow-trace
+    yaml_dir: docs/implementation-artifacts
+    next_command: /Users/lukeannison/projects/qntm/tools/agentic-dev/flow-trace/.venv/bin/flow-trace map .  # DERIVED by flow_trace.prioritization.derive_next_command in the SAME reconcile_queue pass as `queue:` — do not hand-edit (bootstrap-next-command-is-derived-not-typed).
+
+  queue:  # DERIVED by flow_trace.prioritization.derive_queue — the authored override is the `lead` flag in backlog.yaml; do not hand-edit (prioritization-is-derived-not-typed).
+  - id: settle-the-icon-mark
+  - id: finalise-the-lockup-suite
+  - id: ship-favicon-and-app-icon
+  - id: document-the-brand-system
+
+  qualitative:
+  - thread: department-instrumented-2026-06-27
+    note: >
+      The qntm design department is now its own flow-trace member. ASSETS are working (brief,
+      gallery, design language, wordmark — static-evidence verified). DECISIONS are open (pool):
+      the headline one is settle-the-icon-mark — pick THE canonical icon mark from the gallery's
+      Q-as-atom front-runners (a human call), then the lockups, favicon, and system docs follow.
+      Browse the gallery (brand/index.html) to drive these. Design pins are frameworks, not all
+      falsifiable — assets get greens, taste stays an open decision.

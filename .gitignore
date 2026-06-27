@@ -4,3 +4,4 @@ node_modules/
 docs/architecture/derived-flows.yaml
 __pycache__/
 *.pyc
+brand/docs/architecture/derived-flows.yaml

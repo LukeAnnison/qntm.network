@@ -1,0 +1,51 @@
+# qntm-brand — state.yaml (static-evidence invariants over the brand artifacts).
+# Only the ASSET/PROCESS capabilities are enforced; aesthetic decisions are not (see .flow-trace.yaml).
+
+state_invariants:
+
+  - id: state-brief-present
+    name: BRAND.md pins the thesis, taxonomy, and a decisions log
+    description: |
+      brand/BRAND.md exists and contains the meaning (smallest-identifiable + quantification), the
+      taxonomy terms (Wordmark, Lettermark...), and a Decisions log — the durable framework.
+    check: "BRAND.md contains 'smallest identifiable' + 'quantification' + 'Wordmark' + 'Lettermark' + 'Decisions log'"
+    evidence_tier: static
+    predicate: brand_checks:assert_brief_present
+    scenarios: "static_evidence"
+    wired: true
+    gates_capabilities: [has-a-brand-brief]
+
+  - id: state-gallery-present
+    name: the gallery explores the full suite across surfaces
+    description: |
+      brand/index.html carries every category section (wordmark/qmark/atom/lockups/icon), a surface
+      toggle, and a real set of concept tiles (>=10).
+    check: "index.html has the 5 section ids + data-s toggle + >=10 class=tile"
+    evidence_tier: static
+    predicate: brand_checks:assert_gallery_present
+    scenarios: "static_evidence"
+    wired: true
+    gates_capabilities: [browsable-concept-gallery]
+
+  - id: state-design-language-declared
+    name: the portable design language is declared
+    description: |
+      The quantum green (#3ff07f), the two typefaces (Inter + JetBrains), and the glow/radiance
+      signature are declared across BRAND.md + the gallery.
+    check: "corpus contains '#3ff07f' + 'inter' + 'jetbrains' + ('glow' or 'radiance')"
+    evidence_tier: static
+    predicate: brand_checks:assert_design_language_declared
+    scenarios: "static_evidence"
+    wired: true
+    gates_capabilities: [coherent-design-language]
+
+  - id: state-wordmark-present
+    name: the wordmark exists in the gallery
+    description: |
+      brand/index.html has the wordmark section and the 'qntm' wordmark — the stampable asset.
+    check: "index.html has id=wordmark and 'qntm'"
+    evidence_tier: static
+    predicate: brand_checks:assert_wordmark_present
+    scenarios: "static_evidence"
+    wired: true
+    gates_capabilities: [wordmark-exists]
