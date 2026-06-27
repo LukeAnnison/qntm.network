@@ -90,12 +90,13 @@ capabilities:
     cookies, no banner). The SEE half of growth — you can't grow a waitlist you can't
     measure.
   tier: functional
-  status: blocked
+  status: working
   enforced_by:
   - declared_state: state-visits-are-measured
-    verify: FAIL
+    verify: PASS
   enforcement_depth: 1
   enforcement_surface: 0
+  confidence: thin
 - id: capabilities-have-runtime-enforcers
   intent: The site's claims are checked by a deterministic static-evidence runner
     (curl the live URL for 200 + valid cert; assert index.html carries the viewport
