@@ -8,6 +8,9 @@
     "dev": "wrangler dev",
     "tail": "wrangler tail"
   },
+  "dependencies": {
+    "@simplewebauthn/server": "^13"
+  },
   "devDependencies": {
     "wrangler": "^4"
   }

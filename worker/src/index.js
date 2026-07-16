@@ -1,32 +1,14 @@
-// qntm.network — signup capture Worker.
-// POST {email, source?, company?}  -> stores in D1 (dedup), returns {ok}.
-// GET  /export?key=EXPORT_KEY      -> CSV of the list (operator only).
-// 'company' is a honeypot: bots fill it, we silently accept-and-drop.
+// qntm.network Worker — router.
+//   /auth/*         passkey (WebAuthn) register + login          (auth.js)
+//   /app/*          the app: capture + the one thing (bearer)    (app.js)
+//   GET  /export    operator CSV of the signup list              (this file)
+//   POST /          signup capture -> D1 (the original landing)  (this file)
 
-const ALLOWED_ORIGINS = new Set([
-  "https://qntm.network",
-  "https://www.qntm.network",
-  "http://localhost:8731", // local preview
-]);
+import { json, cors } from "./util.js";
+import { handleAuth } from "./auth.js";
+import { handleApp } from "./app.js";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function cors(origin) {
-  const allow = ALLOWED_ORIGINS.has(origin) ? origin : "https://qntm.network";
-  return {
-    "Access-Control-Allow-Origin": allow,
-    "Access-Control-Allow-Methods": "POST, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type",
-    "Vary": "Origin",
-  };
-}
-
-function json(obj, status, origin) {
-  return new Response(JSON.stringify(obj), {
-    status,
-    headers: { "Content-Type": "application/json", ...cors(origin) },
-  });
-}
 
 export default {
   async fetch(request, env) {
@@ -37,7 +19,17 @@ export default {
       return new Response(null, { status: 204, headers: cors(origin) });
     }
 
-    // Operator export — GET /export?key=SECRET  (key set via `wrangler secret put EXPORT_KEY`)
+    // --- app + auth routes (each returns null if the path isn't theirs) ---
+    if (url.pathname.startsWith("/auth/")) {
+      const res = handleAuth(request, env, url, origin);
+      if (res) return res;
+    }
+    if (url.pathname.startsWith("/app/")) {
+      const res = await handleApp(request, env, url, origin);
+      if (res) return res;
+    }
+
+    // --- operator export: GET /export?key=SECRET ---
     if (request.method === "GET" && url.pathname === "/export") {
       if (!env.EXPORT_KEY || url.searchParams.get("key") !== env.EXPORT_KEY) {
         return new Response("forbidden\n", { status: 403 });
@@ -57,11 +49,11 @@ export default {
       });
     }
 
+    // --- original signup capture: POST / ---
     if (request.method !== "POST") {
       return json({ ok: false, error: "method not allowed" }, 405, origin);
     }
 
-    // Parse JSON or form-encoded body.
     let data = {};
     const ct = request.headers.get("Content-Type") || "";
     try {

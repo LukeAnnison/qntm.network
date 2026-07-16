@@ -4,6 +4,7 @@
 name = "qntm-signups"
 main = "src/index.js"
 compatibility_date = "2026-06-01"
+compatibility_flags = ["nodejs_compat"]  # @simplewebauthn/server (passkey verification)
 
 [[d1_databases]]
 binding = "DB"
