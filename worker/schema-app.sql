@@ -56,3 +56,54 @@ CREATE TABLE IF NOT EXISTS captures (
   done_at    TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_captures_user_status ON captures(user_id, status, created_at);
+
+-- ── graph hosting (Option A) — see docs/architecture/graph-hosting-plan.md ──
+-- The projection engine (qntm-md, local) pushes a rendered snapshot; the browser displays it.
+-- Truth stays in the vault. These tables are the cloud half of the stable seam.
+--
+-- v1 stores the snapshot IN D1 (R2 not enabled on the account). It is split across two tables so
+-- no single row nears D1's 1 MB cap: the graph blob in its own row (~712 KB today), each rendered
+-- view in its own row (≤60 KB). Only the LATEST version per user is retained (older pruned on
+-- push). Swapping to R2 later is behind the /app/graph seam — the browser contract is unchanged.
+
+-- The graph blob + node→location map, one row per pushed version.
+CREATE TABLE IF NOT EXISTS graph_snapshots (
+  user_id        TEXT NOT NULL REFERENCES users(id),
+  version        INTEGER NOT NULL,           -- monotonic per user
+  generated_at   TEXT NOT NULL,             -- when qntm-md produced it
+  graph_json     TEXT NOT NULL,             -- the graph_state blob {version,nodes,edges}
+  locations_json TEXT NOT NULL DEFAULT '{}',-- node_id → {view,line} (empty in v1)
+  pushed_at      TEXT NOT NULL DEFAULT (datetime('now')),
+  PRIMARY KEY (user_id, version)
+);
+
+-- One row per rendered view (the rendering of the graph), keyed to the snapshot version.
+CREATE TABLE IF NOT EXISTS graph_snapshot_views (
+  user_id  TEXT NOT NULL REFERENCES users(id),
+  version  INTEGER NOT NULL,
+  view_id  TEXT NOT NULL,                    -- e.g. "this-week"
+  path     TEXT NOT NULL,                    -- vault-relative output path
+  title    TEXT NOT NULL,
+  domain   TEXT,
+  markdown TEXT NOT NULL,
+  PRIMARY KEY (user_id, version, view_id)
+);
+CREATE INDEX IF NOT EXISTS idx_graph_snapshot_views_ver
+  ON graph_snapshot_views(user_id, version);
+
+-- The two-way write queue. A web gesture lands here; the laptop drains it, applies it as the
+-- textual vault edit a human would make, re-runs the cycle, and pushes a new snapshot. qntm-md's
+-- own reconciliation is the single ingestion path — nothing here writes the graph directly.
+CREATE TABLE IF NOT EXISTS graph_edits (
+  id                 TEXT PRIMARY KEY,        -- uuid
+  user_id            TEXT NOT NULL REFERENCES users(id),
+  kind               TEXT NOT NULL,           -- done | reopen | capture | reprioritise
+  node_id            TEXT,                    -- target node (null for capture)
+  payload_json       TEXT,                    -- gesture-specific data
+  status             TEXT NOT NULL DEFAULT 'pending',  -- pending | applied | rejected
+  created_at         TEXT NOT NULL DEFAULT (datetime('now')),
+  applied_at         TEXT,
+  applied_in_version INTEGER                  -- snapshot version that reflects it
+);
+CREATE INDEX IF NOT EXISTS idx_graph_edits_user_status
+  ON graph_edits(user_id, status, created_at);

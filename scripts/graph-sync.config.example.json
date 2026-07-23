@@ -1,0 +1,6 @@
+{
+  "stateDb": "~/.qntm-md/state.db",
+  "vaultDir": "~/qntm",
+  "viewsConfigDir": "/Users/lukeannison/projects/qntm/apps/qntm-md/config/views",
+  "worker": "https://qntm-signups.YOUR-SUBDOMAIN.workers.dev"
+}

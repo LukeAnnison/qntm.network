@@ -61,6 +61,35 @@
   .tick:hover { border-color: var(--glow); box-shadow: 0 0 14px rgba(124,199,255,.25); }
   .topbar { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 1.4rem; }
   a { color: var(--accent); }
+
+  /* NAV (tabs, logged in) */
+  .nav { display: flex; gap: .4rem; margin-bottom: 1.4rem; }
+  .tab {
+    background: transparent; color: var(--dim); border: 1px solid var(--line);
+    border-radius: 999px; padding: .4rem .95rem; font-size: .82rem; box-shadow: none;
+  }
+  .tab:hover { border-color: var(--glow); box-shadow: 0 0 16px rgba(124,199,255,.12); }
+  .tab.active { color: var(--bg); background: var(--accent); border-color: var(--accent); }
+
+  /* GRAPH viewer */
+  .gbar { display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem; }
+  select {
+    font: inherit; color: var(--ink); background: #0c0f14; border: 1px solid var(--line);
+    border-radius: 10px; padding: .55rem .8rem; width: 100%; outline: none;
+  }
+  select:focus { border-color: var(--glow); box-shadow: 0 0 24px rgba(124,199,255,.15); }
+  #freshness { margin: 0 0 1.1rem; }
+  .viewbody { overflow-x: auto; }
+  .viewbody h1, .viewbody h2, .viewbody h3 { font-weight: 600; line-height: 1.25; }
+  .viewbody h2 { font-size: 1.05rem; margin: 1.4rem 0 .5rem; color: var(--accent); }
+  .viewbody h3 { font-size: .92rem; margin: 1.1rem 0 .4rem; color: var(--dim); }
+  .viewbody ul { padding-left: 1.2rem; margin: .3rem 0; }
+  .viewbody li { margin: .18rem 0; }
+  .viewbody a { color: var(--glow); }
+  .viewbody code { background: #0c0f14; border: 1px solid var(--line); border-radius: 6px; padding: .05rem .35rem; font-size: .85em; }
+  .viewbody table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+  .viewbody th, .viewbody td { border: 1px solid var(--line); padding: .35rem .55rem; text-align: left; }
+  .viewbody hr { border: 0; border-top: 1px solid var(--line); margin: 1.2rem 0; }
 </style>
 </head>
 <body>
@@ -85,6 +114,19 @@
     </div>
   </section>
 
+  <!-- NAV (logged in) -->
+  <nav id="nav" class="nav hidden">
+    <button id="navFocus" class="tab active">Focus</button>
+    <button id="navGraph" class="tab">Graph</button>
+  </nav>
+
+  <!-- GRAPH (logged in) — the rendering of the graph, hosted -->
+  <section id="graph" class="hidden">
+    <div class="gbar"><select id="viewPick" aria-label="Choose a view"></select></div>
+    <p id="freshness" class="muted"></p>
+    <article id="viewBody" class="viewbody"></article>
+  </section>
+
   <!-- APP (logged in) -->
   <section id="app" class="hidden">
     <h1 style="margin-bottom:1.2rem">What do you already know needs doing?</h1>
@@ -107,6 +149,10 @@
 
 <script type="module">
 import { startRegistration, startAuthentication } from "https://esm.sh/@simplewebauthn/browser@13";
+import MarkdownIt from "https://esm.sh/markdown-it@14";
+
+// Same markdown setup as app/render/renderer.ts — CommonMark + the table rule.
+const md = new MarkdownIt("commonmark").enable("table");
 
 const API = location.hostname === "localhost" || location.hostname === "127.0.0.1"
   ? "http://localhost:8787"
@@ -117,8 +163,11 @@ const tokenKey = "qntm_token";
 let token = localStorage.getItem(tokenKey);
 
 function show(view) {
+  const loggedIn = view === "app";
   $("entry").classList.toggle("hidden", view !== "entry");
   $("app").classList.toggle("hidden", view !== "app");
+  $("nav").classList.toggle("hidden", !loggedIn);
+  if (!loggedIn) $("graph").classList.add("hidden");
 }
 async function api(path, { method = "POST", body, auth = false } = {}) {
   const headers = { "Content-Type": "application/json" };
@@ -171,6 +220,55 @@ async function done(id) {
   render(await api("/app/done", { body: { id }, auth: true }));
 }
 
+// --- graph viewer: the rendering of the graph, fetched behind the passkey ---
+let graphData = null;
+
+function paintView(id) {
+  const v = graphData?.snapshot?.views.find((x) => x.id === id);
+  $("viewBody").innerHTML = v ? md.render(v.markdown) : "";
+}
+
+async function loadGraph() {
+  const data = await api("/app/graph", { method: "GET", auth: true });
+  graphData = data;
+  const pick = $("viewPick");
+  pick.innerHTML = "";
+  if (!data.snapshot) {
+    $("freshness").textContent = "No snapshot yet — run graph-sync push on the laptop.";
+    $("viewBody").innerHTML = "";
+    return;
+  }
+  // Group the views by domain into <optgroup>s, alphabetised.
+  const byDomain = {};
+  for (const v of data.snapshot.views) (byDomain[v.domain || "—"] ||= []).push(v);
+  for (const dom of Object.keys(byDomain).sort()) {
+    const og = document.createElement("optgroup");
+    og.label = dom;
+    for (const v of byDomain[dom].sort((a, b) => a.title.localeCompare(b.title))) {
+      const o = document.createElement("option");
+      o.value = v.id;
+      o.textContent = v.title;
+      og.append(o);
+    }
+    pick.append(og);
+  }
+  const when = new Date(data.snapshot.generated_at).toLocaleString();
+  $("freshness").textContent = `as of ${when} · ${data.pending_edits} queued`;
+  const def = data.snapshot.views.find((v) => v.id === "this-week") || data.snapshot.views[0];
+  pick.value = def.id;
+  paintView(def.id);
+}
+
+function tab(which) {
+  $("navFocus").classList.toggle("active", which === "focus");
+  $("navGraph").classList.toggle("active", which === "graph");
+  $("app").classList.toggle("hidden", which !== "focus");
+  $("graph").classList.toggle("hidden", which !== "graph");
+  if (which === "graph" && !graphData) {
+    loadGraph().catch((e) => { $("freshness").textContent = e.message; });
+  }
+}
+
 // --- passkey register / login ---
 async function register() {
   $("entryErr").textContent = "";
@@ -197,6 +295,7 @@ async function login() {
 function logout() {
   api("/auth/logout", { auth: true }).catch(() => {});
   localStorage.removeItem(tokenKey); token = null;
+  graphData = null; tab("focus");
   show("entry");
 }
 
@@ -206,6 +305,8 @@ $("loginBtn").addEventListener("click", login);
 $("handle").addEventListener("keydown", (e) => { if (e.key === "Enter") register(); });
 $("doneBtn").addEventListener("click", () => done($("doneBtn").dataset.id));
 $("logoutBtn").addEventListener("click", logout);
+$("navFocus").addEventListener("click", () => tab("focus"));
+$("navGraph").addEventListener("click", () => tab("graph"));
 $("captureBox").addEventListener("keydown", async (e) => {
   if (e.key !== "Enter") return;
   const v = e.target.value.trim(); if (!v) return;

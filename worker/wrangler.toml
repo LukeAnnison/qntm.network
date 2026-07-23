@@ -11,5 +11,17 @@ binding = "DB"
 database_name = "qntm-signups"
 database_id = "fba2e9e9-7e6d-4fa5-932a-219fe35807ac"
 
+# Graph snapshot payloads live in D1 (split rows) for v1 — R2 is not enabled on this account.
+# To move payloads to R2 later (removes the 1 MB/row ceiling): enable R2 in the dashboard,
+# `wrangler r2 bucket create qntm-graph`, uncomment the binding below, and switch the graph
+# handlers in src/app.js back to env.GRAPH.put/get. The /app/graph contract stays identical.
+# [[r2_buckets]]
+# binding = "GRAPH"
+# bucket_name = "qntm-graph"
+
+# Operator (headless laptop push/pull) auth — set as secrets, NOT committed:
+#   wrangler secret put GRAPH_PUSH_KEY     # random shared secret the laptop sends as Bearer
+#   wrangler secret put GRAPH_USER_ID      # your users.id — the operator key maps to this user
+
 [observability]
 enabled = true
