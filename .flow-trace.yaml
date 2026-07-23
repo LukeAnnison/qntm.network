@@ -21,15 +21,19 @@
 
 ordering: capability-driven
 
-# No pyproject/runtime to derive a capture-module filter from — pin an explicit, never-matching
-# include so the loader resolves cleanly (the no-traced-code pattern, per trace-orchestration).
+# CAPTURE FILTER — deliberately never-matching as of 2026-07-23 (the no-traced-code pattern).
+#
+# This briefly pointed at `qntm_network.render` while the Python render app existed (2026-07-22).
+# That app retired the next day: the site became a TypeScript browser application, because a live
+# editor cannot re-run a build-time Python pipeline on every keystroke.
+#
+# So there is no Python application code left to capture — only the static-evidence predicates
+# (qntm_network_checks.py), which are the VERIFIER and must never be traced as if they were the
+# subject. The honest position, stated rather than hidden: flow-trace's `sys.setprofile` capture
+# is Python-only, this project's code is now TypeScript, and therefore flow-trace currently
+# governs this project's DECLARED side (capabilities / backlog / queue / state invariants) and
+# not its call topology. Tracked as flow-trace's own `typescript-capture-backend` row; when that
+# lands, this filter points at app/ and flows.yaml + sinks.yaml come back to life.
 modules:
   include:
-    - qntm_network.render
-
-# CAPTURE CONFIG (not code): follow same-module calls inside build.py, so the
-# render_demo -> render_page and render_demo -> write_page hops (the sink-path) are
-# observed. Without this, only cross-module edges (build -> renderer) are captured.
-intra_module:
-  include:
-    - qntm_network.render.build
+    - qntm_network.__never_traced__

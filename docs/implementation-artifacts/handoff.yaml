@@ -1,13 +1,19 @@
-# qntm.network handoff — the forward record for the static landing site.
-# INSTRUMENTED 2026-06-27: registered as a flow-trace member, so queue + backlog + capability-
-# rollup are DERIVED. No traced RUNTIME yet (static site) — the OBSERVED-side gate (map's verified
-# fan) is N/A until the static-evidence runner lands (capabilities-have-runtime-enforcers). The
-# DECLARED-side derivers (capability-rollup / backlog / queue) are live. Durable pins live in
-# capabilities.yaml (the breadth) + backlog.yaml rows; threads here POINT, they do not restate.
+# qntm.network handoff — the forward record.
+# INSTRUMENTED 2026-06-27 as a flow-trace member, so queue + backlog + capability-rollup are
+# DERIVED. Durable pins live in capabilities.yaml (the breadth) + backlog.yaml rows; threads here
+# POINT, they do not restate.
+#
+# READ THIS FIRST (2026-07-23): the project changed KIND. It was a static landing site; it is now
+# a landing site PLUS a TypeScript browser application (capabilities.yaml, "the application
+# stratum"). The consequence for anyone picking this up: flow-trace's capture is `sys.setprofile`,
+# Python-only, and there is no Python application code left here — so the OBSERVED half (traced
+# flows, depth-to-sink, topology, drift) is ABSENT by construction, and flows.yaml + sinks.yaml
+# are deliberately empty. What governs the app is state.yaml's static-evidence predicates, which
+# check that the right things exist and are wired. Do not read those greens as topological proof.
 handoff:
   project_target: qntm-network            # GATE-TARGET field
-  date: 2026-06-27
-  commit: null                            # self-ref SHA set at first instrumented close
+  date: 2026-07-23
+  commit: null                            # self-ref SHA set at close
 
   bootstrap:                              # the runnable onboarding block
     # flow-trace is invoked via its venv binary (not on PATH). The declared-side derivers
@@ -20,11 +26,56 @@ handoff:
   instance_queue: []  # DERIVED by flow_trace.prioritization.derive_queue(layer='config') — the CONFIG (admin/instance) stratum, partitioned OUT of `queue:` (code); the authored override is the `lead` flag in backlog.yaml; do not hand-edit (prioritization-is-derived-not-typed).
 
   qualitative:
-  - thread: instrumented-2026-06-27
+  - thread: the-app-becomes-typescript-2026-07-23
     note: >
-      First flow-trace instrumentation of qntm.network. The site is LIVE + SECURE (see backlog
-      rows launch-coming-soon-site, secure-with-https — both passing). Five built capabilities are
-      observed-working with thin confidence (no runtime verifier yet). Two capabilities are the
-      work to drive: captures-and-persists-email-signups (the form is a no-op) and
-      capabilities-have-runtime-enforcers (add the static-evidence runner). Evidence tier today is
-      DECLARED — honest, not fake-green.
+      The editability arc. Asked for "an edit mode and a viewer mode, all lost on refresh", which
+      surfaced a language question, which surfaced the real one. The first pass of reasoning was
+      WRONG and worth recording as such: it priced the constraints of the moment — a Worker that
+      happened to be JS, a "no build step" clause written for a hand-authored landing page,
+      three-day-old Python — and treated a demo's incidental decisions as architecture. The
+      operator's correction was the turning point: "this is not even a shard of a real thing, we
+      are allowed to choose what this long-term project should be, we build correctly, we are not
+      constrained by demo decisions made yesterday." That is the reasoning to carry forward when
+      the next fork appears — evaluate the destination, not the sunk cost.
+      DELIVERED: a TypeScript app (strict tsconfig, esbuild, CI build gated on bundle staleness),
+      the markdown renderer ported to the browser, the Python render app RETIRED with its flows
+      and sink in the same change, and view/edit modes with in-memory-only editing. All verified
+      in a real browser, not just by predicate — toggled both ways, typed markdown rendered live,
+      refresh discarded edits, storage empty throughout.
+  - thread: flow-trace-governs-the-tooling-not-the-product
+    note: >
+      The open architectural issue, and the most important thing on this page. With the app in
+      TypeScript and flow-trace's capture in Python, flow-trace now governs this project's
+      DECLARED side (capabilities / backlog / queue / state invariants) and not its call topology.
+      That is not a quirk of this repo — it is the thesis meeting its own limit, and it widens
+      with every browser or edge app built. Filed on the tool as `typescript-capture-backend`
+      (a capability-kind row in flow-trace's own backlog, unscoped, with three candidate shapes
+      to diagnose between: a Node-side hook, bundle-time instrumentation, or CDP). Until it
+      lands, every new app capability here carries a dated `rooting: isolated` naming that
+      ceiling and its creditor, and flows.yaml + sinks.yaml stay empty rather than declaring
+      commitments nothing can observe.
+  - thread: absence-checks-convict-their-own-documentation
+    note: >
+      A lesson from scaffolding the enforcers RED, worth remembering before writing the next
+      absence invariant. Two predicates FAILed against correct code because they grepped raw
+      text: assert_edits_are_ephemeral matched session.ts's docstring ("no localStorage, no
+      sessionStorage...") and assert_markdown_renders_client_side matched flows.yaml's comment
+      explaining why qntm_network.render retired. Prose ABOUT an absence is indistinguishable
+      from its presence to a substring search — so the check punishes exactly the documentation
+      that makes the invariant legible. Fixed structurally rather than by weakening the checks:
+      strip JS comments before scanning (_strip_js_comments), and parse the YAML to inspect
+      declared ENTRIES rather than grepping the file.
+  - thread: open-residue
+    note: >
+      Not blocking, surfaced not hidden. (1) THREE ORPHAN PINS — push-to-deploy-loop,
+      responsive-across-devices, signature-interactions-embody-the-thesis are declared with no
+      driving backlog row. All pre-existing, all plausibly legitimate always-on capabilities;
+      the tool surfaces them as INFO. (2) ROOTING DEBT — 8 pre-existing capabilities carry a
+      silent rooting absence. This arc reasoned the four it TOUCHED (the three new ones, plus
+      push-to-deploy-loop which it amended) and deliberately did not expand into the rest.
+      (3) DEPLOY TARGET DEFERRED — GitHub Pages main:/ is unchanged and the live site was never
+      at risk. Moving to Cloudflare Pages (beside the Worker, with a native build step, which
+      would remove the committed-bundle staleness gate entirely) is a real option; both consume
+      the same output, so it can be decided whenever without reshaping the build.
+      (4) BUNDLE SIZE — demo/app.js is 146kb, nearly all markdown-it. Fine now; if it matters
+      later the fork is a smaller parser versus code-splitting, not a rewrite.

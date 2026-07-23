@@ -58,3 +58,73 @@ backlog:
     broken artifacts, PASS on real). Tier = static-evidence (the honest ceiling for
     a no-runtime static site; 'weak' = not cycle-exercising, which is correct here).
   state: passing
+- id: stand-up-the-typescript-app
+  title: '[app] [foundation] Stand up qntm.network as a real TypeScript browser application
+    — npm + strict tsconfig + bundler producing dist/, TS sources under app/, and a GitHub
+    Actions workflow building on push so the deploy stays push-to-publish with no human
+    in the loop. Chosen deliberately for where this is going (render -> edit -> structure
+    -> graph -> sync), not inherited from the demo. Requires the amended push-to-deploy-loop
+    pin — the retired "no build step" clause described the old implementation, not the
+    commitment. Deploy target (GitHub Pages + Actions vs moving to Cloudflare Pages beside
+    the Worker) is deliberately DEFERRED: both consume the same dist/, so it does not shape
+    the build and should be decided when the first build ships.'
+  driving_capability: app-is-a-typed-browser-application
+  record: >-
+    2026-07-23 — SHIPPED. npm + tsconfig (strict, plus noUncheckedIndexedAccess /
+    exactOptionalPropertyTypes / noImplicitOverride) + esbuild via scripts/build.mjs -> committed
+    demo/app.js + app.css. CI (.github/workflows/build.yml) runs typecheck then build on push to
+    main and FAILS IF demo/ CHANGED — that staleness gate is what makes the amended
+    push-to-deploy-loop true rather than aspirational: the artifact is committed (Pages serves
+    main:/), so forgetting to rebuild is the obvious failure mode, and the machine catches it
+    instead of the operator having to remember. Deploy target deliberately unchanged (GitHub
+    Pages, main:/) so the live site was never at risk during the migration. esbuild bumped
+    0.24 -> 0.28 to clear a moderate advisory; npm audit now reports 0 vulnerabilities.
+  state: passing
+- id: port-the-renderer-to-typescript
+  title: '[app] [render] Port the markdown renderer from build-time Python to the TS app
+    so rendering happens in the browser, and RETIRE qntm_network/render/ entirely — the
+    package, its four declared expected_flows, and the rendered-page-written sink. The
+    retirement is the point, not a tidy-up: browser editing needs a browser renderer, and
+    keeping the Python one would leave two implementations of one contract to diverge
+    silently (architecture.yaml#one-implementation-per-concern). Sequenced AFTER the
+    toolchain and BEFORE editability; the flows and sink retire in the SAME change as the
+    code, so no window exists where declared topology points at nothing.'
+  driving_capability: demo-renders-markdown-in-the-browser
+  record: >-
+    2026-07-23 — SHIPPED. app/render/renderer.ts is a faithful port of the Python
+    MarkdownRenderer (same markdown-it library family, same CommonMark preset, same table rule);
+    only the execution site moved, build-time server -> runtime browser. RETIRED in the same
+    change: qntm_network/render/ (build.py, renderer.py, styles.py, __init__.py),
+    tests/flow_scenarios/render_flow.py, the five expected_flows, and the rendered-page-written
+    sink — flows.yaml and sinks.yaml are now empty with the reasoning written into them, and
+    .flow-trace.yaml is back to a never-matching capture filter since no Python application code
+    remains. demo/index.html became a hand-authored shell instead of a generated artifact.
+    reading.css moved to app/styles/ and is now a linked stylesheet rather than inlined.
+  state: passing
+- id: add-view-and-edit-modes
+  title: '[app] [edit] Give the demo page a VIEW mode (rendered, read-only) and an EDIT
+    mode (markdown source, re-rendering as you type) with a toggle between them, session
+    state held in memory. Edits are EPHEMERAL BY DESIGN — no persistence of any kind,
+    everything lost on refresh — and that is declared with its own enforcer
+    (state-edits-are-ephemeral) rather than left as an implicit TODO, so accidentally
+    adding persistence later FAILs loudly instead of quietly changing what this is. The
+    operator ask that opened the arc, and the smallest honest version of the qntm editing
+    surface.'
+  driving_capability: reader-can-toggle-edit-and-view-modes
+  record: >-
+    2026-07-23 — SHIPPED. EditorSession (app/editor/session.ts) owns mode + text and nothing
+    else — no DOM, no rendering — so the mode logic is reasonable about without a browser;
+    app/main.ts is the single module that touches the page. Re-renders on every keystroke
+    deliberately (pure renderer, small documents; debounce when a document actually stutters, not
+    before). VERIFIED IN A REAL BROWSER, not just by predicate: rendered client-side, toggled both
+    ways, typed markdown became a real h2 + strong live, refresh discarded the edits and restored
+    the original, localStorage and sessionStorage both empty throughout, no console errors.
+    content/demo.md rewritten — it still advertised the retired Python capability and the
+    rendered-page-written sink, which the enforcers could not catch because prose is not checked.
+    NOTE the two predicate bugs this arc found and fixed, both the same mistake one file format
+    apart: assert_edits_are_ephemeral FAILed on session.ts's own docstring ("no localStorage...")
+    and assert_markdown_renders_client_side FAILed on flows.yaml's comment explaining the
+    retirement. Absence checks over raw text convict their own documentation. Fixed properly —
+    strip JS comments before scanning, parse the YAML and inspect declared entries rather than
+    grepping. Worth remembering the next time an absence invariant gets written.
+  state: passing

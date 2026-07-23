@@ -1,0 +1,75 @@
+/* Editor chrome — the toolbar and the two modes. Deliberately quiet: the document is the
+   subject, the controls are furniture. Inherits the palette from reading.css. */
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 1.25rem 1.5rem 0;
+}
+
+.toolbar .mark {
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+#mode-toggle {
+  font: inherit;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  color: var(--fg);
+  background: transparent;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  padding: 0.35rem 1.1rem;
+  cursor: pointer;
+  transition: border-color 120ms ease, color 120ms ease;
+}
+
+#mode-toggle:hover,
+#mode-toggle:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* The two modes. Exactly one pane is shown at a time — the toggle swaps them, and #app's
+   data-mode attribute (set by main.ts) is the single switch driving both. */
+#app[data-mode="view"] #source,
+#app[data-mode="edit"] #rendered {
+  display: none;
+}
+
+#source {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 44rem;
+  margin: 0 auto;
+  min-height: 70vh;
+  padding: 1.5rem;
+  border: none;
+  outline: none;
+  resize: none;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  tab-size: 2;
+}
+
+/* The ephemerality notice. Stated in the interface, not just in the architecture: someone
+   typing into a box reasonably assumes it saves, and this version does not. */
+.ephemeral-note {
+  max-width: 44rem;
+  margin: 2rem auto 3rem;
+  padding: 0 1.5rem;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  color: var(--muted);
+}

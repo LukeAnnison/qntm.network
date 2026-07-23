@@ -1,48 +1,26 @@
-# qntm.network — flows.yaml. DECLARATION, not code — the call-flow SHAPE we commit the
-# render app to. (Was intentionally empty while the site was static; the Python render app
-# gave it real traced flows, 2026-07-22.) flow-trace measures the captured flow against this:
+# qntm.network — flows.yaml. DECLARATION, not code — the call-flow SHAPE we commit code to.
+# flow-trace measures the captured flow against this:
 #   observed AND declared      -> ok (the code does what we said)
 #   observed but NOT declared  -> drift (the code does something we never committed to)
 #   declared but NOT observed  -> a commitment the code stopped honouring
-# This file IS "our definition of right": the numbers become "how far reality sits from the
-# shape we declared", not "whatever flow-trace inferred".
+#
+# EMPTY, and deliberately so (2026-07-23). It held five flows for the Python render app
+# (qntm_network.render.build -> renderer / styles / write_page), which RETIRED when rendering
+# moved into the browser: a live editor cannot re-run a build-time Python pipeline on every
+# keystroke, and keeping the Python renderer alongside the TypeScript one would have left two
+# implementations of one contract to diverge (architecture.yaml#one-implementation-per-concern).
+# Those flows were removed in the SAME change as the code they described, so this file never
+# spent a moment declaring topology that no longer existed.
+#
+# It stays empty until flow-trace can capture TypeScript. The successor flows are real and
+# knowable — main.mount -> MarkdownRenderer.toHtml, main.mount -> EditorSession.toggle, and the
+# DOM mount as the terminal effect — but flow-trace's capture is `sys.setprofile`, Python only.
+# Declaring them now would manufacture five permanent declared-but-never-observed findings, which
+# would read as governance while being precisely its opposite: a commitment nothing can check.
+# They get declared when flow-trace's `typescript-capture-backend` row lands. Until then the TS
+# app is held to state.yaml's static-evidence invariants, which verify that the right things
+# exist and are wired — real evidence, but existence-checking, never topological proof.
 
-expected_flows:
-
-  # THE SINK-PATH: render_demo assembles the page, then writes it (the sink).
-  # Same-module (build->build), so it needs .flow-trace.yaml intra_module.include: build.
-  - id: render-demo-assembles
-    from: qntm_network.render.build
-    to:   qntm_network.render.build
-    callee: render_page
-    event: render.demo-assembles-page
-
-  - id: render-demo-writes-sink
-    from: qntm_network.render.build
-    to:   qntm_network.render.build
-    callee: write_page
-    event: render.demo-writes-the-sink
-
-  # THE TRANSFORM BRANCH: render_page runs the pure MarkdownRenderer — it returns a value and
-  # never reaches the sink, so it sits OFF the sink-path (a pure leaf, zero added depth).
-  - id: render-page-builds-renderer
-    from: qntm_network.render.build
-    to:   qntm_network.render.renderer
-    callee: MarkdownRenderer.__init__
-    event: render.builds-renderer
-
-  - id: render-page-transforms-markdown
-    from: qntm_network.render.build
-    to:   qntm_network.render.renderer
-    callee: MarkdownRenderer.to_html
-    event: render.markdown-to-html
-
-  # render_page also loads the reading stylesheet and inlines it (off the sink-path — a
-  # pure source that returns text). DECLARED here alongside the code (declare-first door).
-  - id: render-page-loads-css
-    from: qntm_network.render.build
-    to:   qntm_network.render.styles
-    callee: load_css
-    event: render.loads-stylesheet
+expected_flows: []
 
 forbidden_flows: []

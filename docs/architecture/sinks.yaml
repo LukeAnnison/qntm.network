@@ -1,10 +1,13 @@
-# DECLARED SINKS (this is declaration, NOT code) — where render work LANDS.
-# depth-to-sink is measured TO these points. This is the editorial call: WE decide the
-# file-write is the terminal effect worth measuring to, so "depth" reads as "how many hops
-# from intent (the entry) to the page landing on disk". Change this line and you change what
-# the whole depth number means — the measure is ours to set.
-sinks:
-  - id: rendered-page-written
-    sink: qntm_network.render.build:write_page
-    description: the render sink — the assembled HTML page written to disk for Cloudflare
-      Pages to serve; the terminal effect that depth-to-sink is measured to.
+# DECLARED SINKS (this is declaration, NOT code) — where work LANDS. depth-to-sink is measured
+# TO these points, so this file decides what "depth" means for this project.
+#
+# EMPTY as of 2026-07-23. It declared `rendered-page-written`
+# (qntm_network.render.build:write_page) — the Python build's file write. That sink retired with
+# the render app when rendering moved into the browser.
+#
+# The successor is real but undeclarable today: a browser app's terminal effect is the DOM mount
+# (app/main.ts:mount), not a disk write. Same reason as flows.yaml — flow-trace captures Python
+# only, so a declared TypeScript sink could never be observed, and depth-to-sink would be measured
+# to a point nothing reaches. Declared when `typescript-capture-backend` lands.
+
+sinks: []

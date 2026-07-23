@@ -1,10 +1,13 @@
 # qntm.network — state.yaml (the deterministic artifact/endpoint-check invariants).
 #
-# These are the CANDIDATE enforcers — the deterministic checks that, once WIRED into a static-
-# evidence runner (capabilities-have-runtime-enforcers), produce real PASS/FAIL for the
-# capabilities above. `wired: false` everywhere TODAY = the predicate is not yet built, so each
-# reads UNVERIFIABLE and the caps it would gate stay observed-thin (no fake greens). Wiring them
-# is the industrialization work. `check` documents exactly what each will assert.
+# These are the enforcers — the deterministic checks that, run by the static-evidence runner
+# (capabilities-have-runtime-enforcers), produce real PASS/FAIL for the capabilities above.
+# `check` documents exactly what each asserts.
+#
+# All invariants here are now WIRED (the original header described a pre-runner state that ended
+# 2026-06-27, when the runner landed and the first nine flipped green). A wired invariant that
+# FAILs is not broken governance — it is a RED specification of work not yet done, which is
+# exactly what the application-stratum block at the bottom of this file currently is.
 
 state_invariants:
 
@@ -35,11 +38,19 @@ state_invariants:
     gates_capabilities: [served-securely-over-https]
 
   - id: state-deploy-is-push-to-publish
-    name: the deploy path is push-to-publish (no manual build/upload step)
+    name: the deploy path is push-to-publish (no human in the loop after the push)
     description: |
       The repo publishes via GitHub Pages from main root with a CNAME file = qntm.network; a push
       to main is the entire deploy. Checkable from the repo + Pages config, no human in the loop.
-    check: "CNAME file == 'qntm.network'; Pages source = main:/; a git push to main is the deploy"
+
+      AMENDED 2026-07-23 alongside capabilities.yaml#push-to-deploy-loop. The invariant is NO
+      HUMAN IN THE LOOP AFTER THE PUSH — not "no build exists". A build that runs automatically
+      on push (CI) satisfies this; a build the operator must remember to run locally does not.
+      When the TypeScript app's CI build lands, this predicate EXTENDS to assert the workflow is
+      present and triggers on push to main — it does not get relaxed. Tightening the check as the
+      deploy grows is the point; the commitment is unchanged.
+    check: "CNAME file == 'qntm.network'; Pages source = main:/; a git push to main is the deploy,
+      with any build step running automatically in CI (never a manual local step)"
     evidence_tier: static
     predicate: qntm_network_checks:assert_deploy_is_push_to_publish
     scenarios: "static_evidence"
@@ -122,3 +133,82 @@ state_invariants:
     scenarios: "static_evidence"
     wired: true
     gates_capabilities: [visits-are-measured]
+
+  # ── The application stratum (declared + scaffolded RED 2026-07-23) ───────────────────────
+  # Enforcers for the TypeScript app capabilities. All four are WIRED and currently FAIL — that
+  # is the intended state, not a defect: the predicates exist in qntm_network_checks.py and
+  # assert against a repo that has no app/ at all, so each is a RED specification of the thing
+  # still to be built. Each flips green only when the implementation lands, and that FAIL→PASS
+  # transition is the proof the capability closed rather than was merely declared closed.
+  #
+  # Note the shape these take: Python predicates asserting over TypeScript ARTIFACTS (files,
+  # config, built output, the live page). That is the honest ceiling while flow-trace cannot
+  # capture TS call flow — it verifies that the right things EXIST and are wired, not that the
+  # calls flow as declared. Do not mistake a green here for traced-flow evidence.
+
+  - id: state-app-is-a-typed-build
+    name: the app is a strict-typechecked TypeScript build wired into CI
+    description: |
+      The repo carries a real TypeScript toolchain — package.json with a build script, a tsconfig
+      declaring strict mode, TypeScript sources under app/, and a GitHub Actions workflow that
+      runs the build on push to main. Together these make "typed application" checkable rather
+      than aspirational: a build that never runs, or a tsconfig with strict off, is the failure
+      mode this exists to catch. SCAFFOLD-RED until the toolchain lands.
+    check: "package.json has a build script; tsconfig.json sets strict: true; app/**/*.ts sources
+      exist; .github/workflows/ contains a workflow triggering on push to main that runs the build"
+    evidence_tier: static
+    predicate: qntm_network_checks:assert_app_is_a_typed_build
+    scenarios: "static_evidence"
+    wired: true
+    gates_capabilities: [app-is-a-typed-browser-application]
+
+  - id: state-markdown-renders-client-side
+    name: the demo page renders markdown in the browser from a single TS renderer
+    description: |
+      The demo page loads the built app bundle and renders markdown client-side, and there is
+      exactly ONE markdown implementation in the repo — the TypeScript renderer. The retired
+      Python render package (qntm_network/render/) is GONE, not merely unused: a dormant second
+      renderer is the exact duplication this capability exists to prevent, and a check that only
+      asserted the TS renderer's presence would pass happily with both sitting side by side.
+      SCAFFOLD-RED until the port lands and the Python package is removed.
+    check: "demo/index.html loads the built app bundle; a TS markdown renderer exists under app/;
+      qntm_network/render/ is absent; no declared flow or sink still references it"
+    evidence_tier: static
+    predicate: qntm_network_checks:assert_markdown_renders_client_side
+    scenarios: "static_evidence"
+    wired: true
+    gates_capabilities: [demo-renders-markdown-in-the-browser]
+
+  - id: state-edit-and-view-modes-are-togglable
+    name: the demo page exposes a view/edit mode toggle
+    description: |
+      The app exposes two explicit modes — a read-only rendered view and an editable markdown
+      source view — with a control that switches between them. Checked structurally against the
+      TS sources and the served page. SCAFFOLD-RED until the editor lands.
+    check: "an editor module under app/ declares both modes and a toggle between them; the built
+      page exposes the mode control"
+    evidence_tier: static
+    predicate: qntm_network_checks:assert_edit_and_view_modes_are_togglable
+    scenarios: "static_evidence"
+    wired: true
+    gates_capabilities: [reader-can-toggle-edit-and-view-modes]
+
+  - id: state-edits-are-ephemeral
+    name: edits are held in memory only and never persisted
+    description: |
+      The editor persists NOTHING — no localStorage, no sessionStorage, no IndexedDB, no network
+      write of document content. "All lost on refresh" is a declared property of this version, so
+      it gets a real enforcer rather than a comment: if someone later adds persistence without
+      declaring it, this FAILs and the change has to be made deliberately, through governance,
+      rather than silently altering what the thing is.
+
+      This is an ABSENCE invariant, and absence checks are easy to write badly — it asserts over
+      the app's own sources, not the whole repo, so the Worker's legitimate signup persistence
+      (worker/src/index.js writes to D1 by design) does not trip it.
+    check: "no localStorage / sessionStorage / indexedDB reference in app/ sources; no fetch or
+      XHR carrying document content out of the editor module"
+    evidence_tier: static
+    predicate: qntm_network_checks:assert_edits_are_ephemeral
+    scenarios: "static_evidence"
+    wired: true
+    gates_capabilities: [reader-can-toggle-edit-and-view-modes]

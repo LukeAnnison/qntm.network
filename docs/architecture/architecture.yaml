@@ -4,6 +4,21 @@
 # (classes / packages / observed flows) is N/A. The state invariants in state.yaml are the
 # candidate runtime (static-evidence), declared now and WIRED later (capabilities-have-runtime-
 # enforcers). Until wired they are unverified — principles cite them, caps stay observed-thin.
+#
+# SCOPE CHANGE 2026-07-23 — the site is becoming an APPLICATION. A TypeScript browser app
+# (render -> edit -> structure -> graph -> sync) is declared in capabilities.yaml under "the
+# application stratum", and the build-time Python render app retires into it. Read the ceiling
+# honestly: flow-trace captures Python only (`sys.setprofile`), so the TS app earns NO traced
+# flows, NO depth-to-sink, and NO class-rooting — its evidence tier is static-evidence, the same
+# tier worker/src/index.js sits at, and every new capability carries a dated `rooting: isolated`
+# naming that ceiling and its creditor (flow-trace's `typescript-capture-backend` row).
+#
+# This is worth stating plainly rather than burying: with the application in TypeScript and the
+# tooling in Python, flow-trace currently governs this project's TOOLING and not its PRODUCT.
+# That is a real gap in the thesis, not a quirk of this repo, and it widens with every app built.
+# flows.yaml / sinks.yaml are deliberately NOT extended to the TS app in the meantime —
+# declaring a call shape nothing can observe manufactures permanent declared-but-never-observed
+# drift, which would read as governance while being its opposite.
 
 type_catalogue: [capability, principle, state, flow, sink]   # flow+sink added 2026-07-22: the render app is now traced Python
 
@@ -43,3 +58,28 @@ principles:
       thin confidence — honest, never fake-green.
     enforced_by:
       - state.yaml#state-capabilities-have-runtime-enforcers
+
+  - id: typed-structure-is-checkable
+    rule: >
+      The application is written in a language that checks its own declared structure. This is
+      declared-before-enforced applied one level DOWN — flow-trace checks that the call topology
+      matches what we committed to; a strict typechecker checks that the data shapes do. Both are
+      the same move: state the structure, then have a machine hold reality to it. Untyped code in
+      an application meant to grow (render -> edit -> structure -> graph -> sync) means the
+      shapes live only in the author's head, which is precisely the drift this project exists to
+      refuse. Adopted 2026-07-23 with the TypeScript app; the build runs in CI so the check is
+      never a step someone can forget.
+    enforced_by:
+      - state.yaml#state-app-is-a-typed-build
+
+  - id: one-implementation-per-concern
+    rule: >
+      A concern has exactly ONE implementation in this repo. The specific case that forced this
+      pin: markdown rendering existed in build-time Python, and browser editing needed rendering
+      in the browser — the tempting move was to add a second renderer and keep both. Two
+      implementations of one contract diverge, silently, and the divergence surfaces as a bug in
+      whichever one you were not looking at. So the Python renderer RETIRES rather than lingering
+      unused; a dormant duplicate is still a duplicate, and its enforcer checks for absence, not
+      merely for the presence of the survivor.
+    enforced_by:
+      - state.yaml#state-markdown-renders-client-side

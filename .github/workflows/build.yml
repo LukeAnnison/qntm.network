@@ -1,0 +1,44 @@
+# The app build check — runs on every push to main.
+#
+# This is what keeps the AMENDED push-to-deploy-loop honest (capabilities.yaml). GitHub Pages
+# serves this repo from main:/ with no build of its own, so demo/app.js is a COMMITTED artifact,
+# and a committed artifact drifts the moment someone edits app/ and forgets to rebuild.
+#
+# So the job does not merely build — it builds and then FAILS IF THE WORKING TREE CHANGED. A
+# stale bundle is caught by the machine rather than depending on the operator remembering, which
+# is exactly the commitment: no human in the loop after the push. Typecheck runs first, because a
+# bundle that builds from code that does not typecheck is not the check we said we had.
+
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: typecheck (tsc --noEmit, strict)
+        run: npm run typecheck
+
+      - name: build the app bundle
+        run: npm run build
+
+      - name: fail if the committed bundle is stale
+        run: |
+          if ! git diff --exit-code -- demo/; then
+            echo "::error::demo/ is out of date with app/ — run 'npm run build' and commit the result."
+            exit 1
+          fi

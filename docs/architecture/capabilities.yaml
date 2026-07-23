@@ -24,10 +24,23 @@ capabilities:
   enforcement_surface: 0
   confidence: thin
 - id: push-to-deploy-loop
-  intent: The operator changes the site by editing index.html and running `git push`
-    — live on qntm.network in under a minute, no separate build or upload step. The
-    path of least resistance for iteration itself.
+  intent: The operator changes the site and runs `git push` — live on qntm.network
+    in under a minute, with no human in the loop between the push and the deploy.
+    The path of least resistance for iteration itself. (AMENDED 2026-07-23 — the original
+    wording added "no separate build or upload step", which described the hand-authored-HTML
+    implementation of the day, not the commitment. The commitment is PUSH IS THE WHOLE
+    DEPLOY — a build that runs automatically in CI honours it exactly; a build the
+    operator must remember to run locally does not. Retiring the incidental clause
+    is what lets the app become a compiled TypeScript application without either violating
+    this pin or quietly redefining it.)
   tier: functional
+  rooting: isolated — this capability has no code to root against, in any language.
+    It is a property of the DEPLOY PATH (a CNAME, the Pages source setting, and a
+    CI workflow), so there is no class it could ever route through and no tool ceiling
+    to wait on. Reasoned here because this arc amended the capability and GATE-ROOTED
+    audits what an arc touches; the eight other pre-existing capabilities still carry
+    a silent absence, which is real debt this arc did not take on rather than something
+    it resolved.
   status: working
   enforced_by:
   - declared_state: state-deploy-is-push-to-publish
@@ -111,3 +124,65 @@ capabilities:
   enforcement_depth: 1
   enforcement_surface: 0
   confidence: thin
+- id: app-is-a-typed-browser-application
+  intent: qntm.network is built as a real TypeScript browser application — npm-managed
+    dependencies, a tsconfig with strict typechecking, a bundler producing a versioned
+    dist/, and a CI build that runs on push so the deploy stays push-to-publish. The
+    foundation every later app capability (render, edit, structure, graph, sync) is
+    built on, chosen for where this is going rather than for what the demo page was.
+  tier: foundational
+  rooting: isolated — class-rooting is NOT ACHIEVABLE for this capability today, and
+    this opt-out is a tool ceiling rather than a design preference. flow-trace derives
+    classes and topology from Python call capture (`sys.setprofile`, src/flow_trace/capture.py);
+    this capability is realised entirely in TypeScript, which flow-trace cannot yet
+    capture. The opt-out CONVERTS to real class-rooting the moment flow-trace's `typescript-capture-backend`
+    row lands — it is a dated debt with a named creditor, not a permanent isolation
+    claim.
+  status: working
+  enforced_by:
+  - declared_state: state-app-is-a-typed-build
+    verify: PASS
+  enforcement_depth: 1
+  enforcement_surface: 0
+  confidence: thin
+- id: demo-renders-markdown-in-the-browser
+  intent: A reader opening qntm.network/demo gets markdown rendered to clean, legible
+    HTML by the browser itself — headings, emphasis, lists, code, links — from a single
+    TypeScript renderer that is the ONLY markdown implementation in the project. Replaces
+    the build-time Python renderer (qntm_network/render/), which retires along with
+    its declared flows and its file-write sink, so no second implementation is carried.
+  tier: functional
+  rooting: isolated — same tool ceiling as app-is-a-typed-browser-application. The
+    renderer is TypeScript and flow-trace's capture is Python-only, so no class can
+    be rooted against it until `typescript-capture-backend` lands. Converts to class-rooted
+    at that point.
+  status: working
+  enforced_by:
+  - declared_state: state-markdown-renders-client-side
+    verify: PASS
+  enforcement_depth: 1
+  enforcement_surface: 0
+  confidence: thin
+- id: reader-can-toggle-edit-and-view-modes
+  intent: A reader on the demo page can toggle between VIEW mode (the rendered document,
+    read-only) and EDIT mode (the markdown source, editable, re-rendering as they
+    type), and back, without losing what they typed in the session. Edits are EPHEMERAL
+    BY DESIGN — held in memory only, never persisted, discarded on refresh. The ephemerality
+    is a declared property with its own enforcer rather than an unimplemented TODO.
+    This is the smallest honest version of the qntm editing surface, and "it does
+    not save" is a commitment that should fail loudly if someone later makes it save
+    by accident.
+  tier: functional
+  rooting: isolated — same tool ceiling as app-is-a-typed-browser-application. The
+    editor is TypeScript and flow-trace's capture is Python-only, so no class can
+    be rooted against it until `typescript-capture-backend` lands. Converts to class-rooted
+    at that point.
+  status: working
+  enforced_by:
+  - declared_state: state-edit-and-view-modes-are-togglable
+    verify: PASS
+  - declared_state: state-edits-are-ephemeral
+    verify: PASS
+  enforcement_depth: 2
+  enforcement_surface: 0
+  confidence: held
