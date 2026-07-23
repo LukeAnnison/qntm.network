@@ -9,6 +9,7 @@ lands.
 Observed call flow (the depth-to-sink number reads this):
     render_demo -> write_page -> [SINK: file write]        depth 2  (the headline)
     render_demo -> render_page -> MarkdownRenderer.to_html  (returns; off the sink-path)
+    render_demo -> render_page -> styles.load_css           (returns; off the sink-path)
 """
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from qntm_network.render.renderer import MarkdownRenderer
+from qntm_network.render.styles import load_css
 
 _ROOT = Path(__file__).resolve().parents[2]  # .../qntm.network
 _DEMO_MD = _ROOT / "content" / "demo.md"
@@ -27,9 +29,10 @@ _PAGE_SHELL = """<!doctype html>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{title}</title>
+<style>{css}</style>
 </head>
 <body>
-<main style="max-width:44rem;margin:3rem auto;padding:0 1.25rem;font:16px/1.6 system-ui,sans-serif">
+<main>
 {body}
 </main>
 </body>
@@ -38,9 +41,10 @@ _PAGE_SHELL = """<!doctype html>
 
 
 def render_page(markdown: str, title: str = "qntm.network — markdown demo") -> str:
-    """Pure: markdown -> a full HTML page string (renderer + shell, no I/O)."""
+    """markdown -> a full HTML page string: the transform + the inlined stylesheet + shell."""
     body = MarkdownRenderer().to_html(markdown)
-    return _PAGE_SHELL.format(title=title, body=body)
+    css = load_css()
+    return _PAGE_SHELL.format(title=title, css=css, body=body)
 
 
 def write_page(html: str, out_path: Path = _OUT) -> Path:

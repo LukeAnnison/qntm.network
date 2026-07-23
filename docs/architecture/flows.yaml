@@ -37,4 +37,12 @@ expected_flows:
     callee: MarkdownRenderer.to_html
     event: render.markdown-to-html
 
+  # render_page also loads the reading stylesheet and inlines it (off the sink-path — a
+  # pure source that returns text). DECLARED here alongside the code (declare-first door).
+  - id: render-page-loads-css
+    from: qntm_network.render.build
+    to:   qntm_network.render.styles
+    callee: load_css
+    event: render.loads-stylesheet
+
 forbidden_flows: []
