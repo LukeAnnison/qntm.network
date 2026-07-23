@@ -5,28 +5,37 @@
 # candidate runtime (static-evidence), declared now and WIRED later (capabilities-have-runtime-
 # enforcers). Until wired they are unverified — principles cite them, caps stay observed-thin.
 #
-# SCOPE CHANGE 2026-07-23 — the site is becoming an APPLICATION. A TypeScript browser app
+# SCOPE CHANGE 2026-07-23 — the site is now an APPLICATION. A TypeScript browser app
 # (render -> edit -> structure -> graph -> sync) is declared in capabilities.yaml under "the
-# application stratum", and the build-time Python render app retires into it. Read the ceiling
-# honestly: flow-trace captures Python only (`sys.setprofile`), so the TS app earns NO traced
-# flows, NO depth-to-sink, and NO class-rooting — its evidence tier is static-evidence, the same
-# tier worker/src/index.js sits at, and every new capability carries a dated `rooting: isolated`
-# naming that ceiling and its creditor (flow-trace's `typescript-capture-backend` row).
+# application stratum", and the build-time Python render app retired into it.
 #
-# This is worth stating plainly rather than burying: with the application in TypeScript and the
-# tooling in Python, flow-trace currently governs this project's TOOLING and not its PRODUCT.
-# That is a real gap in the thesis, not a quirk of this repo, and it widens with every app built.
-# flows.yaml / sinks.yaml are deliberately NOT extended to the TS app in the meantime —
-# declaring a call shape nothing can observe manufactures permanent declared-but-never-observed
-# drift, which would read as governance while being its opposite.
+# TWO PASSES IN ONE DAY, and the first one's caveat is GONE. The morning's note said the TS app
+# could earn no traced flows, no depth-to-sink and no class-rooting, because flow-trace captured
+# Python only — so with the app in TypeScript it governed this project's TOOLING and not its
+# PRODUCT. That gap was filed against the tool as `typescript-capture-backend`; it was BUILT the
+# same day (working, depth 3) and adopted here that afternoon. The observed half now reaches this
+# project's real code: flows.yaml and sinks.yaml declare the app's actual topology, classes.yaml
+# gives the three concerns canonical homes, and two of the three app capabilities converted from
+# `rooting: isolated` to genuine class-rooting — exactly what their opt-out text promised would
+# happen when the backend landed. The evidence for those capabilities is no longer static-evidence
+# alone; it is declared-flow-versus-observed, adjudicated by tests/flow_scenarios/render_and_edit.ts
+# running under the node observer.
+#
+# WHAT IS STILL HONEST TO SAY. worker/src/index.js remains untraced (no scenario drives it), and
+# `app-is-a-typed-browser-application` stays `rooting: isolated` for a permanent reason rather
+# than a deferred one — it is a property of the toolchain, not of any call path. And the observed
+# half here rests on a scenario with a stubbed DOM: it proves the modules call each other as
+# declared, NOT that the page looks right in a browser. That second claim is what the in-browser
+# check at every close is for. Do not let one stand in for the other.
 
-type_catalogue: [capability, principle, state, flow, sink]   # flow+sink added 2026-07-22: the render app is now traced Python
+type_catalogue: [capability, principle, state, flow, sink, class]   # class added 2026-07-23 with classes.yaml
 
 files:
   capabilities: capabilities.yaml   # the apex breadth (visitor/operator-can statements, tiered)
   state: state.yaml                 # the structurally-checkable invariants (candidate enforcers)
   flows: flows.yaml                 # the DECLARED call-flow shape — reality is measured against this
   sinks: sinks.yaml                 # the DECLARED sinks — where work lands; the depth measuring points
+  classes: classes.yaml             # the canonical concerns + their homes (added 2026-07-23)
   # backlog + handoff live in docs/implementation-artifacts/ (canonical)
 
 ordering: capability-driven   # the queue derives from capability tier x status; `lead` is the only knob
@@ -83,3 +92,6 @@ principles:
       merely for the presence of the survivor.
     enforced_by:
       - state.yaml#state-markdown-renders-client-side
+      - classes.yaml#markdown-rendering   # added 2026-07-23: canonical routing makes "one
+        # implementation" structural — a second renderer shows up as a path doing rendering
+        # work without routing through this class's home, not merely as a file that exists.

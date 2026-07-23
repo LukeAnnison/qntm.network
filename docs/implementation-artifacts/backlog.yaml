@@ -128,3 +128,30 @@ backlog:
     strip JS comments before scanning, parse the YAML and inspect declared entries rather than
     grepping. Worth remembering the next time an absence invariant gets written.
   state: passing
+- id: adopt-typescript-flow-capture
+  title: '[instrument] [observed-half] Adopt flow-trace''s TypeScript capture backend now that it
+    exists — declare the app''s real call topology in flows.yaml, the DOM mount in sinks.yaml, and
+    the three concerns in a new classes.yaml, so the app capabilities convert from
+    `rooting: isolated` to genuine class-rooting. Closes the ceiling this project documented in the
+    morning: the observed half (traced flows, depth-to-sink, canonical routing, declared-vs-actual
+    drift) reaches the product code and not only the tooling.'
+  driving_capability: demo-renders-markdown-in-the-browser
+  record: >-
+    2026-07-23 — SHIPPED, same day the gap was filed. tests/flow_scenarios/render_and_edit.ts drives
+    the real chain (mount -> renderer, toggle both ways, type -> re-render) under the node observer;
+    all 5 declared flows observed with counts matching what the scenario drives (toHtml x2, toggle
+    x2, setSource x1). Two forbidden_flows declare the purity rules structurally: neither the
+    renderer nor the session may call back into the DOM-owning module. classes.yaml gives the three
+    concerns canonical homes; page-presentation governs the document-mounted sink. Capability depth
+    went 1 -> 3 (renders) and 1 -> 5 (edit modes), both now horizontally rooted.
+    FORCED A REAL FIX IN OUR OWN CODE: app/main.ts ended in a bare `void main()`, so importing it
+    ran it — unobservable by anything that is not a browser. Split into main.ts (importable,
+    exports mount/main) and boot.ts (the sole top-level side effect, and the build entry); the CSS
+    imports moved with it since node cannot resolve them. The app is unchanged behaviourally,
+    re-verified in-browser after the split.
+    ALSO FOUND AND FIXED A FLOW-TRACE BUG (separate repo, committed there): fan-out breadth
+    median is fractional for an even unit count, but CapabilityRollupOutput.summary and
+    EntryOutput.summary were typed dict[str, int] — this project was the first with an even
+    distribution, and it took out map/capability-rollup/queue/backlog together. Widened to
+    int | float with a mutation-proven regression test.
+  state: passing

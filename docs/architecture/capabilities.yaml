@@ -131,13 +131,15 @@ capabilities:
     foundation every later app capability (render, edit, structure, graph, sync) is
     built on, chosen for where this is going rather than for what the demo page was.
   tier: foundational
-  rooting: isolated — class-rooting is NOT ACHIEVABLE for this capability today, and
-    this opt-out is a tool ceiling rather than a design preference. flow-trace derives
-    classes and topology from Python call capture (`sys.setprofile`, src/flow_trace/capture.py);
-    this capability is realised entirely in TypeScript, which flow-trace cannot yet
-    capture. The opt-out CONVERTS to real class-rooting the moment flow-trace's `typescript-capture-backend`
-    row lands — it is a dated debt with a named creditor, not a permanent isolation
-    claim.
+  rooting: 'isolated — REASON REPLACED 2026-07-23 (second pass). The original text
+    said class-rooting was blocked by a tool ceiling (flow-trace could not capture
+    TypeScript) and would convert the moment `typescript-capture-backend` landed.
+    It landed the same day, and the sibling capabilities DID convert — they are class-rooted
+    against classes.yaml now. This one does not, for a different and permanent reason:
+    it is a property of the TOOLCHAIN (package.json, a strict tsconfig, a CI workflow),
+    not of application code, so there is no call path through any class that could
+    host it. Rooting an "is it built correctly" capability against a runtime class
+    would be a fiction. Isolated is the honest answer here, not a deferred one.'
   status: working
   enforced_by:
   - declared_state: state-app-is-a-typed-build
@@ -152,17 +154,23 @@ capabilities:
     the build-time Python renderer (qntm_network/render/), which retires along with
     its declared flows and its file-write sink, so no second implementation is carried.
   tier: functional
-  rooting: isolated — same tool ceiling as app-is-a-typed-browser-application. The
-    renderer is TypeScript and flow-trace's capture is Python-only, so no class can
-    be rooted against it until `typescript-capture-backend` lands. Converts to class-rooted
-    at that point.
   status: working
   enforced_by:
+  - declared_flow: main-renders-markdown
+    verify: PASS
+  - declared_flow: main-reads-session-source
+    verify: PASS
   - declared_state: state-markdown-renders-client-side
     verify: PASS
-  enforcement_depth: 1
-  enforcement_surface: 0
-  confidence: thin
+  - class: markdown-rendering
+  - class: page-presentation
+  enforcement_depth: 3
+  enforcement_surface: 4
+  enforcement_density: '0.75'
+  confidence: held
+  horizontal_completeness:
+    rooted: true
+    policy: advisory
 - id: reader-can-toggle-edit-and-view-modes
   intent: A reader on the demo page can toggle between VIEW mode (the rendered document,
     read-only) and EDIT mode (the markdown source, editable, re-rendering as they
@@ -173,16 +181,24 @@ capabilities:
     not save" is a commitment that should fail loudly if someone later makes it save
     by accident.
   tier: functional
-  rooting: isolated — same tool ceiling as app-is-a-typed-browser-application. The
-    editor is TypeScript and flow-trace's capture is Python-only, so no class can
-    be rooted against it until `typescript-capture-backend` lands. Converts to class-rooted
-    at that point.
   status: working
   enforced_by:
+  - declared_flow: main-reads-session-mode
+    verify: PASS
+  - declared_flow: main-toggles-mode
+    verify: PASS
+  - declared_flow: main-updates-source
+    verify: PASS
   - declared_state: state-edit-and-view-modes-are-togglable
     verify: PASS
   - declared_state: state-edits-are-ephemeral
     verify: PASS
-  enforcement_depth: 2
-  enforcement_surface: 0
+  - class: page-presentation
+  - class: editing-session-state
+  enforcement_depth: 5
+  enforcement_surface: 3
+  enforcement_density: '1.67'
   confidence: held
+  horizontal_completeness:
+    rooted: true
+    policy: advisory

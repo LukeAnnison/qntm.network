@@ -134,17 +134,18 @@ state_invariants:
     wired: true
     gates_capabilities: [visits-are-measured]
 
-  # ── The application stratum (declared + scaffolded RED 2026-07-23) ───────────────────────
-  # Enforcers for the TypeScript app capabilities. All four are WIRED and currently FAIL — that
-  # is the intended state, not a defect: the predicates exist in qntm_network_checks.py and
-  # assert against a repo that has no app/ at all, so each is a RED specification of the thing
-  # still to be built. Each flips green only when the implementation lands, and that FAIL→PASS
-  # transition is the proof the capability closed rather than was merely declared closed.
+  # ── The application stratum (2026-07-23) ─────────────────────────────────────────────────
+  # Enforcers for the TypeScript app capabilities. All four are wired and green. They were
+  # scaffolded RED against a repo with no app/ at all, and the FAIL→PASS transition as the app
+  # landed is what proves those capabilities closed rather than were declared closed.
   #
   # Note the shape these take: Python predicates asserting over TypeScript ARTIFACTS (files,
-  # config, built output, the live page). That is the honest ceiling while flow-trace cannot
-  # capture TS call flow — it verifies that the right things EXIST and are wired, not that the
-  # calls flow as declared. Do not mistake a green here for traced-flow evidence.
+  # config, built output, the live page). They verify that the right things EXIST and are wired
+  # — never that the calls flow as declared. That second question used to be unanswerable here;
+  # since flow-trace's TypeScript capture landed and was adopted the same day, it is answered by
+  # flows.yaml adjudicated against tests/flow_scenarios/render_and_edit.ts. The two are
+  # complementary and neither implies the other: existence checks catch a deleted file, flow
+  # checks catch a rewiring that leaves every file in place. Read each for what it asserts.
 
   - id: state-app-is-a-typed-build
     name: the app is a strict-typechecked TypeScript build wired into CI

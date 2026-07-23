@@ -11,7 +11,9 @@
 import { build } from "esbuild";
 
 await build({
-  entryPoints: ["app/main.ts"],
+  // boot.ts, not main.ts — the bootstrap is the only module with a top-level side effect, and
+  // main.ts stays importable so flow-trace's node observer can watch it. See app/boot.ts.
+  entryPoints: ["app/boot.ts"],
   bundle: true,
   format: "esm",
   target: ["es2022"],

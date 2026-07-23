@@ -1,0 +1,47 @@
+# qntm.network — classes.yaml. The canonical-concern grouping (type #6).
+#
+# A class here is not the `class` keyword — it is a CONCERN with one canonical home, the
+# chokepoint every flow for that concern must route through. Declaring one is opt-in strictness:
+# once declared, `flow-trace canonical-routing` reports any path that does the concern's work
+# WITHOUT going through its home (compliant-but-bypassing), which is the failure this file exists
+# to make visible.
+#
+# NEW 2026-07-23 (second pass). This file did not exist while the app was unobservable — a class
+# whose routing nothing can check is a label, not governance. flow-trace's
+# `typescript-capture-backend` landing made routing adjudicable on TypeScript (leg 3), so the
+# three app capabilities converted from `rooting: isolated` to real class-rooting against these
+# homes, exactly as their opt-out text promised they would.
+#
+# Identity convention (JS/TS): `path/without/extension:Symbol`.
+
+classes:
+
+  - id: markdown-rendering
+    concern: >
+      Turning markdown source into HTML. The whole of it — there is exactly one markdown
+      implementation in this project (architecture.yaml#one-implementation-per-concern), and
+      this class is the structural form of that claim: any second renderer would show up as a
+      path doing rendering work without routing through this home.
+    canonical_class: app/render/renderer:MarkdownRenderer
+    status: working
+
+  - id: editing-session-state
+    concern: >
+      What the reader is looking at and what they have typed — the mode (view/edit) and the
+      in-memory document. Deliberately holds NO presentation: the session never touches the DOM
+      (flows.yaml#session-never-touches-the-dom), which is what keeps the mode machine reasonable
+      about, and testable, without a browser.
+    canonical_class: app/editor/session:EditorSession
+    status: working
+
+  - id: page-presentation
+    concern: >
+      Everything page-shaped — reading the session, painting the rendered HTML, reflecting mode
+      into the DOM, and wiring the toggle. The ONLY concern permitted to touch the document, so
+      the other two can stay pure. It governs the mount sink because mounting IS this concern's
+      terminal act: the point where the renderer's output and the session's state become
+      something a reader can see and type into.
+    canonical_class: app/main:mount
+    governs_sinks:
+      - document-mounted
+    status: working

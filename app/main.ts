@@ -1,22 +1,27 @@
 /**
- * The app entry — mount the document, wire the view/edit toggle.
+ * The app's wiring — mount the document, wire the view/edit toggle.
  *
  * This is the only module that touches the DOM. The renderer is pure and the session holds mode
  * plus text, so everything page-shaped is concentrated here rather than smeared across all three.
  *
- * The old build-time pipeline's terminal effect was a file write (the retired
- * `rendered-page-written` sink). A browser app's terminal effect is the DOM mount, which is what
- * `mount()` below is. That sink is NOT declared in sinks.yaml, deliberately: flow-trace captures
- * Python only, so declaring a TypeScript sink would create a commitment nothing can ever observe.
- * It gets declared when flow-trace's `typescript-capture-backend` lands.
+ * DELIBERATELY SIDE-EFFECT-FREE ON IMPORT. This module used to end with a bare `void main()`,
+ * which meant importing it ran it — so it could not be exercised by anything that was not a
+ * browser, and flow-trace's node observer could not see a single call. Adopting the TypeScript
+ * capture backend forced the split that should have existed anyway: the bootstrap moved to
+ * boot.ts (the build's entry point), and the stylesheet imports went with it, since they are a
+ * bundler concern that node cannot resolve. What remains here is importable, observable, and
+ * callable with a stub DOM — which is exactly why tests/flow_scenarios/render_and_edit.ts can
+ * drive the real chain.
+ *
+ * `mount()` is the SINK (`app/main:mount`, sinks.yaml). A browser app's terminal effect is the
+ * DOM mount, not a disk write — depth-to-sink here reads "how many hops from entry to the
+ * document being on screen".
  */
 
 import { MarkdownRenderer } from "./render/renderer.js";
 import { EditorSession } from "./editor/session.js";
-import "./styles/reading.css";
-import "./styles/editor.css";
 
-const SOURCE_URL = "../content/demo.md";
+export const SOURCE_URL = "../content/demo.md";
 
 function required<T extends Element>(selector: string): T {
   const el = document.querySelector<T>(selector);
@@ -70,7 +75,8 @@ export function mount(source: string): void {
   reflect();
 }
 
-async function main(): Promise<void> {
+/** Fetch the document and mount it. Called by boot.ts; never on import. */
+export async function main(): Promise<void> {
   const rendered = required<HTMLElement>("#rendered");
   try {
     const response = await fetch(SOURCE_URL);
@@ -84,5 +90,3 @@ async function main(): Promise<void> {
     rendered.textContent = `Could not load ${SOURCE_URL}: ${String(error)}`;
   }
 }
-
-void main();

@@ -1,26 +1,86 @@
-# qntm.network — flows.yaml. DECLARATION, not code — the call-flow SHAPE we commit code to.
+# qntm.network — flows.yaml. DECLARATION, not code — the call-flow SHAPE we commit the app to.
 # flow-trace measures the captured flow against this:
 #   observed AND declared      -> ok (the code does what we said)
 #   observed but NOT declared  -> drift (the code does something we never committed to)
 #   declared but NOT observed  -> a commitment the code stopped honouring
 #
-# EMPTY, and deliberately so (2026-07-23). It held five flows for the Python render app
-# (qntm_network.render.build -> renderer / styles / write_page), which RETIRED when rendering
-# moved into the browser: a live editor cannot re-run a build-time Python pipeline on every
-# keystroke, and keeping the Python renderer alongside the TypeScript one would have left two
-# implementations of one contract to diverge (architecture.yaml#one-implementation-per-concern).
-# Those flows were removed in the SAME change as the code they described, so this file never
-# spent a moment declaring topology that no longer existed.
+# LIVE AGAIN 2026-07-23 (second pass). This file was emptied that morning when the Python render
+# app retired into TypeScript and flow-trace could not observe TS at all — declaring a shape
+# nothing could check would have manufactured permanent drift. flow-trace's
+# `typescript-capture-backend` landed the same day (working, depth 3), so the commitment is
+# checkable now and the declarations come back.
 #
-# It stays empty until flow-trace can capture TypeScript. The successor flows are real and
-# knowable — main.mount -> MarkdownRenderer.toHtml, main.mount -> EditorSession.toggle, and the
-# DOM mount as the terminal effect — but flow-trace's capture is `sys.setprofile`, Python only.
-# Declaring them now would manufacture five permanent declared-but-never-observed findings, which
-# would read as governance while being precisely its opposite: a commitment nothing can check.
-# They get declared when flow-trace's `typescript-capture-backend` row lands. Until then the TS
-# app is held to state.yaml's static-evidence invariants, which verify that the right things
-# exist and are wired — real evidence, but existence-checking, never topological proof.
+# NOTE THE IDENTITY CONVENTION: for a JS/TS target a module is its repo-relative path without
+# extension (`app/render/renderer`), not a dotted package path, and a callee is the function or
+# `Class.method` name. Observed by tests/flow_scenarios/render_and_edit.ts under the node observer.
 
-expected_flows: []
+expected_flows:
 
-forbidden_flows: []
+  # ── THE TRANSFORM ────────────────────────────────────────────────────────────────────────
+  # paint() calls the pure renderer. Fires on the initial mount AND on every keystroke; one
+  # declared edge covers both because it is the same commitment either way.
+  - id: main-renders-markdown
+    from: app/main
+    to:   app/render/renderer
+    callee: MarkdownRenderer.toHtml
+    event: app.markdown-to-html
+    class: markdown-rendering
+    gates_capabilities: [demo-renders-markdown-in-the-browser]
+
+  # ── THE SESSION ──────────────────────────────────────────────────────────────────────────
+  # main.ts owns the DOM and the session owns the state, so every read of mode or text is a
+  # cross-module call. Declaring the getters as well as the mutators is deliberate: they are
+  # real observed edges, and leaving them undeclared would report as drift while being exactly
+  # what we intend. An accurate map includes the quiet edges.
+
+  - id: main-reads-session-source
+    from: app/main
+    to:   app/editor/session
+    callee: EditorSession.source
+    event: app.reads-document-text
+    class: page-presentation
+    gates_capabilities: [demo-renders-markdown-in-the-browser]
+
+  - id: main-reads-session-mode
+    from: app/main
+    to:   app/editor/session
+    callee: EditorSession.mode
+    event: app.reads-current-mode
+    class: page-presentation
+    gates_capabilities: [reader-can-toggle-edit-and-view-modes]
+
+  - id: main-toggles-mode
+    from: app/main
+    to:   app/editor/session
+    callee: EditorSession.toggle
+    event: app.switches-view-and-edit
+    class: editing-session-state
+    gates_capabilities: [reader-can-toggle-edit-and-view-modes]
+
+  - id: main-updates-source
+    from: app/main
+    to:   app/editor/session
+    callee: EditorSession.setSource
+    event: app.records-typed-text
+    class: editing-session-state
+    gates_capabilities: [reader-can-toggle-edit-and-view-modes]
+
+forbidden_flows:
+
+  # The renderer is PURE and the session holds nothing but mode and text — neither may reach the
+  # DOM. This is the structural form of "main.ts is the only module that touches the page": stated
+  # as a rule the tool enforces, rather than a convention a later change could quietly break.
+  - id: renderer-never-touches-the-dom
+    from: app/render/renderer
+    to:   app/main
+    reason: >
+      The renderer is a pure transform. If it ever calls back into the DOM-owning module the
+      purity claim is dead, live re-rendering on every keystroke stops being safe, and the
+      renderer can no longer be exercised without a browser.
+
+  - id: session-never-touches-the-dom
+    from: app/editor/session
+    to:   app/main
+    reason: >
+      The session is state, not presentation. A call back into main.ts would make the mode
+      machine depend on the page it drives, which is the coupling that makes editors untestable.

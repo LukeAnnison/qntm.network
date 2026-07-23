@@ -5,11 +5,12 @@
 #
 # READ THIS FIRST (2026-07-23): the project changed KIND. It was a static landing site; it is now
 # a landing site PLUS a TypeScript browser application (capabilities.yaml, "the application
-# stratum"). The consequence for anyone picking this up: flow-trace's capture is `sys.setprofile`,
-# Python-only, and there is no Python application code left here — so the OBSERVED half (traced
-# flows, depth-to-sink, topology, drift) is ABSENT by construction, and flows.yaml + sinks.yaml
-# are deliberately empty. What governs the app is state.yaml's static-evidence predicates, which
-# check that the right things exist and are wired. Do not read those greens as topological proof.
+# stratum"), and it HAS the observed half over that TypeScript — traced flows, depth-to-sink,
+# canonical routing, declared-vs-actual drift. The morning's version of this note said the
+# opposite (flow-trace captured Python only, so the app was governed by static-evidence alone);
+# the tool closed that gap the same day and this project adopted it the same afternoon. Both
+# halves are live now: state.yaml predicates check the right things EXIST, flows.yaml checks the
+# calls GO where we said. Neither implies the other — read each for what it asserts.
 handoff:
   project_target: qntm-network            # GATE-TARGET field
   date: 2026-07-23
@@ -42,18 +43,34 @@ handoff:
       and sink in the same change, and view/edit modes with in-memory-only editing. All verified
       in a real browser, not just by predicate — toggled both ways, typed markdown rendered live,
       refresh discarded edits, storage empty throughout.
-  - thread: flow-trace-governs-the-tooling-not-the-product
+  - thread: the-tooling-product-gap-opened-and-closed-the-same-day
     note: >
-      The open architectural issue, and the most important thing on this page. With the app in
-      TypeScript and flow-trace's capture in Python, flow-trace now governs this project's
-      DECLARED side (capabilities / backlog / queue / state invariants) and not its call topology.
-      That is not a quirk of this repo — it is the thesis meeting its own limit, and it widens
-      with every browser or edge app built. Filed on the tool as `typescript-capture-backend`
-      (a capability-kind row in flow-trace's own backlog, unscoped, with three candidate shapes
-      to diagnose between: a Node-side hook, bundle-time instrumentation, or CDP). Until it
-      lands, every new app capability here carries a dated `rooting: isolated` naming that
-      ceiling and its creditor, and flows.yaml + sinks.yaml stay empty rather than declaring
-      commitments nothing can observe.
+      RESOLVED — kept because the SHAPE of it is the point, not the outcome. This thread was
+      written in the morning to record that flow-trace governed this project's TOOLING and not its
+      PRODUCT: the app had gone TypeScript, flow-trace captured Python only, and the observed half
+      was simply absent. It was filed on the TOOL as `typescript-capture-backend` rather than
+      carried as a shrug here, because a gap in a shared substrate that widens with every app
+      built is the tool's problem to solve, not each project's constraint to absorb. flow-trace
+      built it that day — scaffold-RED, then three legs (the node observer, scenario dispatch by
+      language, canonical routing on TS) — and it is `working` at depth 3. Adopted here the same
+      afternoon. The lesson worth keeping: the gap closed because it was WRITTEN somewhere the
+      derived queue could see it. Had it stayed a caveat in a code comment it would still be true.
+  - thread: what-the-observed-half-here-does-and-does-not-prove
+    note: >
+      The app's flows are adjudicated by tests/flow_scenarios/render_and_edit.ts, which drives the
+      REAL modules under the node observer with a STUBBED DOM — a few fake elements carrying only
+      the members mount() actually touches. Read the claim precisely. It proves these modules call
+      each other as flows.yaml declares, and the two forbidden_flows prove the renderer and the
+      session never call back into the DOM-owning module. It does NOT prove the page renders
+      correctly; that is the in-browser check every close runs. The three layers are complementary
+      rather than redundant: existence checks catch a deleted file, flow checks catch a rewiring
+      that leaves every file in place, the browser catches the thing that is wired right and looks
+      wrong.
+      ONE STRUCTURAL CONSEQUENCE NOT TO UNDO: app/main.ts must stay importable without side
+      effects. It used to end in a bare `void main()`, which made it unobservable by anything that
+      is not a browser (and made it throw under node on a relative fetch URL). The bootstrap now
+      lives alone in boot.ts, which is the build entry and which nothing imports. Putting a
+      top-level call back into main.ts would silently kill the observed half.
   - thread: absence-checks-convict-their-own-documentation
     note: >
       A lesson from scaffolding the enforcers RED, worth remembering before writing the next

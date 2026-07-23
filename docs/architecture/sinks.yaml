@@ -1,13 +1,21 @@
 # DECLARED SINKS (this is declaration, NOT code) — where work LANDS. depth-to-sink is measured
 # TO these points, so this file decides what "depth" means for this project.
 #
-# EMPTY as of 2026-07-23. It declared `rendered-page-written`
-# (qntm_network.render.build:write_page) — the Python build's file write. That sink retired with
-# the render app when rendering moved into the browser.
+# LIVE AGAIN 2026-07-23 (second pass), for the same reason as flows.yaml: the sink is checkable
+# now that flow-trace observes TypeScript. It previously declared `rendered-page-written`
+# (qntm_network.render.build:write_page), the Python build's file write, which retired with that
+# app; the file then sat empty while TS was unobservable.
 #
-# The successor is real but undeclarable today: a browser app's terminal effect is the DOM mount
-# (app/main.ts:mount), not a disk write. Same reason as flows.yaml — flow-trace captures Python
-# only, so a declared TypeScript sink could never be observed, and depth-to-sink would be measured
-# to a point nothing reaches. Declared when `typescript-capture-backend` lands.
+# THE EDITORIAL CALL, restated because changing this line changes what every depth number means:
+# a browser app's terminal effect is the DOM mount, not a disk write. So depth reads as "how many
+# hops from entry to the document being on screen" — the browser equivalent of what
+# "hops to the page landing on disk" meant before.
 
-sinks: []
+sinks:
+  - id: document-mounted
+    sink: app/main:mount
+    description: >
+      the mount sink — the document rendered into the page and the toggle wired, the terminal
+      effect the app exists to produce. mount() is where the pure renderer's output and the
+      session's state become something a reader can see and type into; everything upstream is
+      preparation and everything inside it is presentation.

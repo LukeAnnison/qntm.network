@@ -21,19 +21,26 @@
 
 ordering: capability-driven
 
-# CAPTURE FILTER — deliberately never-matching as of 2026-07-23 (the no-traced-code pattern).
+# CAPTURE FILTER — the TypeScript app (2026-07-23, second pass).
 #
-# This briefly pointed at `qntm_network.render` while the Python render app existed (2026-07-22).
-# That app retired the next day: the site became a TypeScript browser application, because a live
-# editor cannot re-run a build-time Python pipeline on every keystroke.
+# For a JS/TS target, module identity is the REPO-RELATIVE PATH WITHOUT EXTENSION
+# (`app/render/renderer`), so these entries are path PREFIXES, not dotted package roots — the
+# convention differs from the Python side and the loader treats them accordingly (flow-trace
+# js_capture.py). The scenario suffix is what dispatches a run to the node observer rather than
+# `sys.setprofile`; nothing here selects the backend.
 #
-# So there is no Python application code left to capture — only the static-evidence predicates
-# (qntm_network_checks.py), which are the VERIFIER and must never be traced as if they were the
-# subject. The honest position, stated rather than hidden: flow-trace's `sys.setprofile` capture
-# is Python-only, this project's code is now TypeScript, and therefore flow-trace currently
-# governs this project's DECLARED side (capabilities / backlog / queue / state invariants) and
-# not its call topology. Tracked as flow-trace's own `typescript-capture-backend` row; when that
-# lands, this filter points at app/ and flows.yaml + sinks.yaml come back to life.
+# The history in one line, because this file changed shape twice in two days: it pointed at
+# `qntm_network.render` while the Python render app existed (2026-07-22), went never-matching
+# when that app retired into TypeScript and flow-trace could not see TS at all, and now points at
+# app/ because flow-trace's `typescript-capture-backend` landed (v1, working at depth 3). The
+# observed half — traced flows, depth-to-sink, canonical routing, declared-vs-actual drift —
+# reaches this project's real code for the first time.
+#
+# `app/boot` is EXCLUDED on purpose. It is the bootstrap: its only job is a top-level side effect,
+# it is the build's entry point, and nothing imports it. Observing it would record a single
+# start-up edge that says nothing about how the app is structured.
 modules:
   include:
-    - qntm_network.__never_traced__
+    - app
+  exclude:
+    - app/boot
