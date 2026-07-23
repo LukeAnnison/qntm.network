@@ -1,11 +1,40 @@
-# qntm.network — flows.yaml (intentionally empty).
-#
-# This project has NO traced runtime (a static landing site), so there are no expected or
-# forbidden CALL flows to declare — the observed-side contract is N/A here. The file exists only
-# because flow-trace's declaration loader expects it; the LOAD-BEARING declarations for this
-# project are capabilities.yaml + state.yaml (the declared side the derivers read). If the site
-# ever grows a checkable runtime (the static-evidence runner — capabilities-have-runtime-enforcers),
-# its checks land in state.yaml, not here.
+# qntm.network — flows.yaml. DECLARATION, not code — the call-flow SHAPE we commit the
+# render app to. (Was intentionally empty while the site was static; the Python render app
+# gave it real traced flows, 2026-07-22.) flow-trace measures the captured flow against this:
+#   observed AND declared      -> ok (the code does what we said)
+#   observed but NOT declared  -> drift (the code does something we never committed to)
+#   declared but NOT observed  -> a commitment the code stopped honouring
+# This file IS "our definition of right": the numbers become "how far reality sits from the
+# shape we declared", not "whatever flow-trace inferred".
 
-expected_flows: []
+expected_flows:
+
+  # THE SINK-PATH: render_demo assembles the page, then writes it (the sink).
+  # Same-module (build->build), so it needs .flow-trace.yaml intra_module.include: build.
+  - id: render-demo-assembles
+    from: qntm_network.render.build
+    to:   qntm_network.render.build
+    callee: render_page
+    event: render.demo-assembles-page
+
+  - id: render-demo-writes-sink
+    from: qntm_network.render.build
+    to:   qntm_network.render.build
+    callee: write_page
+    event: render.demo-writes-the-sink
+
+  # THE TRANSFORM BRANCH: render_page runs the pure MarkdownRenderer — it returns a value and
+  # never reaches the sink, so it sits OFF the sink-path (a pure leaf, zero added depth).
+  - id: render-page-builds-renderer
+    from: qntm_network.render.build
+    to:   qntm_network.render.renderer
+    callee: MarkdownRenderer.__init__
+    event: render.builds-renderer
+
+  - id: render-page-transforms-markdown
+    from: qntm_network.render.build
+    to:   qntm_network.render.renderer
+    callee: MarkdownRenderer.to_html
+    event: render.markdown-to-html
+
 forbidden_flows: []

@@ -25,4 +25,11 @@ ordering: capability-driven
 # include so the loader resolves cleanly (the no-traced-code pattern, per trace-orchestration).
 modules:
   include:
-    - qntm_network._no_capture
+    - qntm_network.render
+
+# CAPTURE CONFIG (not code): follow same-module calls inside build.py, so the
+# render_demo -> render_page and render_demo -> write_page hops (the sink-path) are
+# observed. Without this, only cross-module edges (build -> renderer) are captured.
+intra_module:
+  include:
+    - qntm_network.render.build

@@ -5,11 +5,13 @@
 # candidate runtime (static-evidence), declared now and WIRED later (capabilities-have-runtime-
 # enforcers). Until wired they are unverified — principles cite them, caps stay observed-thin.
 
-type_catalogue: [capability, principle, state]   # no flow/forbidden_flow/sink — no traced code
+type_catalogue: [capability, principle, state, flow, sink]   # flow+sink added 2026-07-22: the render app is now traced Python
 
 files:
   capabilities: capabilities.yaml   # the apex breadth (visitor/operator-can statements, tiered)
   state: state.yaml                 # the structurally-checkable invariants (candidate enforcers)
+  flows: flows.yaml                 # the DECLARED call-flow shape — reality is measured against this
+  sinks: sinks.yaml                 # the DECLARED sinks — where work lands; the depth measuring points
   # backlog + handoff live in docs/implementation-artifacts/ (canonical)
 
 ordering: capability-driven   # the queue derives from capability tier x status; `lead` is the only knob

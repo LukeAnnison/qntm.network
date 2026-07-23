@@ -1,0 +1,10 @@
+# DECLARED SINKS (this is declaration, NOT code) — where render work LANDS.
+# depth-to-sink is measured TO these points. This is the editorial call: WE decide the
+# file-write is the terminal effect worth measuring to, so "depth" reads as "how many hops
+# from intent (the entry) to the page landing on disk". Change this line and you change what
+# the whole depth number means — the measure is ours to set.
+sinks:
+  - id: rendered-page-written
+    sink: qntm_network.render.build:write_page
+    description: the render sink — the assembled HTML page written to disk for Cloudflare
+      Pages to serve; the terminal effect that depth-to-sink is measured to.
