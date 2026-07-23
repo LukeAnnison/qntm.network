@@ -13,7 +13,7 @@
 handoff:
   project_target: qntm-network            # GATE-TARGET field
   date: 2026-07-23
-  commit: null                            # self-ref SHA set at close
+  commit: 745a140                       # self-ref SHA (the work commit, 2026-07-23 close)
 
   bootstrap:                              # the runnable onboarding block
     # flow-trace is invoked via its venv binary (not on PATH). The declared-side derivers
