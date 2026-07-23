@@ -1,73 +1,209 @@
-/* qntm.network reading stylesheet — echoes the qntm-quantum "monochrome edition":
-   black, white, and the quantum between; one teal accent (#008B8B), used sparingly.
-   Theme-aware: light by default, dark via prefers-color-scheme. */
+/* qntm reading stylesheet — the canonical skin.
+   Matte black · electric green · Inter / JetBrains Mono.
+
+   ONE identity, three places. These tokens are copied verbatim from index.html's :root and match
+   the vault snippet .obsidian/snippets/qntm-network.css, so the landing page, this reading
+   surface, and Obsidian all render the same qntm. The previous version of this file took only the
+   qntm-quantum MONOCHROME layer (white ground, teal #008B8B, system fonts) and missed the network
+   re-tint that sits over it — half the identity, and the wrong half.
+
+   The prose treatments below are ports of qntm-network.css's "landing-flavour touches": H1 in
+   accent green, links green and underlined only on hover, inline code in accent-hi on the soft
+   ground, blockquotes with a green left rule, bold at full ink so it pops on the matte black. */
 
 :root {
-  --bg: #ffffff;
-  --fg: #16181a;
-  --muted: #6b7280;
-  --rule: #e5e7eb;
-  --accent: #008B8B;
-  --code-bg: #f4f5f6;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0c0d0e;
-    --fg: #e7e9ea;
-    --muted: #9aa0a6;
-    --rule: #23262a;
-    --code-bg: #17191b;
-  }
+  --bg:        #0a0b0a;
+  --bg-soft:   #0f120f;
+  --bg-alt:    #0c0e0c;
+  --line:      #1c211c;
+  --line-lit:  #2a322a;
+  --ink:       #e6ebe6;
+  --ink-dim:   #8a948a;
+  --ink-faint: #555c55;
+  --acc:       #3ff07f;
+  --acc-hi:    #6df59b;
+  --acc-dim:   #1f7a44;
+  --acc-glow:  rgba(63, 240, 127, 0.14);
+  --on-acc:    #04120a;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
 }
 
-* { box-sizing: border-box; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
 html { -webkit-text-size-adjust: 100%; }
+
 body {
-  margin: 0;
   background: var(--bg);
-  color: var(--fg);
-  font: 17px/1.7 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", system-ui, sans-serif;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 1.02rem;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
-main { max-width: 46rem; margin: 0 auto; padding: 4rem 1.4rem 6rem; }
 
-h1, h2, h3 { line-height: 1.25; font-weight: 650; letter-spacing: -0.01em; margin: 2.4em 0 0.6em; }
-h1 { font-size: 2.1rem; margin-top: 0; }
-h2 { font-size: 1.5rem; }
-h3 { font-size: 1.2rem; color: var(--muted); }
-h1, h2 { padding-bottom: 0.25em; border-bottom: 1px solid var(--rule); }
+::selection { background: var(--acc); color: var(--on-acc); }
 
-p, ul, ol, table, pre, blockquote { margin: 1.1em 0; }
-a { color: var(--accent); text-decoration: none; border-bottom: 1px solid transparent; }
-a:hover { border-bottom-color: var(--accent); }
-strong { font-weight: 650; }
+/* ── The document column ─────────────────────────────────────────────────────────────────── */
 
-ul, ol { padding-left: 1.4em; }
-li { margin: 0.3em 0; }
-
-code {
-  font: 0.88em/1.5 "SF Mono", "JetBrains Mono", ui-monospace, Menlo, monospace;
-  background: var(--code-bg);
-  padding: 0.15em 0.4em;
-  border-radius: 4px;
+#rendered {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 2.5rem 1.5rem 1rem;
 }
-pre {
-  background: var(--code-bg);
-  padding: 1em 1.2em;
-  border-radius: 8px;
+
+/* ── Headings — tight tracking, like the landing type ────────────────────────────────────── */
+
+#rendered h1,
+#rendered h2,
+#rendered h3,
+#rendered h4 {
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+}
+
+/* H1 takes the accent — the qntm green headline feel. */
+#rendered h1 {
+  color: var(--acc);
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  letter-spacing: -0.03em;
+  margin-bottom: 1.4rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--line);
+}
+
+#rendered h2 {
+  font-size: 1.35rem;
+  margin: 2.6rem 0 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+#rendered h3 {
+  font-size: 1.05rem;
+  color: var(--ink-dim);
+  margin: 2rem 0 0.7rem;
+}
+
+#rendered h4 {
+  font-size: 0.95rem;
+  color: var(--ink-dim);
+  margin: 1.6rem 0 0.6rem;
+}
+
+/* ── Body copy ───────────────────────────────────────────────────────────────────────────── */
+
+#rendered p { margin: 1.05rem 0; }
+
+#rendered strong { color: var(--ink); font-weight: 600; }
+#rendered em { color: var(--ink); font-style: italic; }
+
+#rendered a {
+  color: var(--acc);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+#rendered a:hover {
+  color: var(--acc-hi);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+#rendered ul,
+#rendered ol { margin: 1.05rem 0; padding-left: 1.35rem; }
+#rendered li { margin: 0.4rem 0; }
+#rendered li::marker { color: var(--acc-dim); }
+
+/* ── Code — mono, accent-hi on the soft ground ───────────────────────────────────────────── */
+
+#rendered code {
+  font-family: var(--mono);
+  font-size: 0.86em;
+  color: var(--acc-hi);
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 5px;
+  padding: 0.1em 0.4em;
+}
+
+#rendered pre {
+  background: var(--bg-soft);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1.1rem 1.25rem;
+  margin: 1.5rem 0;
   overflow-x: auto;
-  border: 1px solid var(--rule);
-}
-pre code { background: none; padding: 0; }
-
-blockquote {
-  margin-left: 0;
-  padding: 0.2em 1.1em;
-  border-left: 3px solid var(--accent);
-  color: var(--muted);
 }
 
-table { border-collapse: collapse; width: 100%; font-size: 0.95em; }
-th, td { padding: 0.55em 0.8em; border: 1px solid var(--rule); text-align: left; }
-th { font-weight: 650; background: var(--code-bg); }
+/* Inside a block the chrome belongs to the block, not to each token. */
+#rendered pre code {
+  background: none;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+  color: var(--ink);
+  font-size: 0.85rem;
+  line-height: 1.65;
+}
 
-hr { border: none; border-top: 1px solid var(--rule); margin: 2.5em 0; }
+/* ── Blockquote — the green left rule ────────────────────────────────────────────────────── */
+
+#rendered blockquote {
+  border-left: 2px solid var(--acc-dim);
+  background: var(--acc-glow);
+  color: var(--ink-dim);
+  margin: 1.6rem 0;
+  padding: 0.9rem 1.25rem;
+  border-radius: 0 8px 8px 0;
+}
+#rendered blockquote p { margin: 0.4rem 0; }
+
+/* ── Tables ──────────────────────────────────────────────────────────────────────────────── */
+
+#rendered table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.6rem 0;
+  font-size: 0.92rem;
+}
+
+#rendered th,
+#rendered td {
+  border: 1px solid var(--line);
+  padding: 0.6rem 0.85rem;
+  text-align: left;
+}
+
+#rendered th {
+  background: var(--bg-soft);
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+#rendered tbody tr:hover { background: var(--bg-alt); }
+
+/* ── Rules + media ───────────────────────────────────────────────────────────────────────── */
+
+#rendered hr {
+  border: none;
+  border-top: 1px solid var(--line);
+  margin: 2.4rem 0;
+}
+
+#rendered img { max-width: 100%; height: auto; border-radius: 8px; }
+
+/* ── Scrollbars — quiet on the matte black ──────────────────────────────────────────────── */
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--line-lit); border-radius: 6px; }
+::-webkit-scrollbar-thumb:hover { background: var(--acc-dim); }
+
+@media (max-width: 640px) {
+  body { font-size: 0.98rem; }
+  #rendered { padding: 1.75rem 1.15rem 1rem; }
+}

@@ -1,44 +1,85 @@
-/* Editor chrome — the toolbar and the two modes. Deliberately quiet: the document is the
-   subject, the controls are furniture. Inherits the palette from reading.css. */
+/* Editor chrome — the toolbar and the two modes. Inherits the palette from reading.css.
+   The brand mark and the mode button are lifted from index.html's header (mono type, the pulsing
+   green node, the bordered pill that lights to accent on hover) so /demo reads as the same site
+   rather than a differently-styled page that happens to share a domain. */
+
+/* ── Toolbar — the landing header, quieter ──────────────────────────────────────────────── */
 
 .toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  max-width: 44rem;
-  margin: 0 auto;
-  padding: 1.25rem 1.5rem 0;
+  padding: 1rem clamp(1.15rem, 4vw, 1.5rem);
+  background: linear-gradient(to bottom, rgba(10, 11, 10, 0.92), rgba(10, 11, 10, 0.72));
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
 }
 
+/* The brand — mono wordmark plus the pulsing node, as on the landing page. */
 .toolbar .mark {
-  font-size: 0.8rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--mono);
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ink);
 }
+
+.toolbar .mark::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--acc);
+  box-shadow: 0 0 12px var(--acc);
+  animation: pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.45; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .toolbar .mark::before { animation: none; }
+}
+
+/* ── The mode button — the landing's .navlink pill ───────────────────────────────────────── */
 
 #mode-toggle {
-  font: inherit;
-  font-size: 0.85rem;
+  font-family: var(--mono);
+  font-size: 0.78rem;
   letter-spacing: 0.04em;
-  color: var(--fg);
+  color: var(--ink-dim);
   background: transparent;
-  border: 1px solid var(--rule);
-  border-radius: 999px;
-  padding: 0.35rem 1.1rem;
+  border: 1px solid var(--line-lit);
+  border-radius: 6px;
+  padding: 0.45rem 0.95rem;
   cursor: pointer;
-  transition: border-color 120ms ease, color 120ms ease;
+  transition: color 0.2s, border-color 0.2s, box-shadow 0.2s;
 }
 
 #mode-toggle:hover,
 #mode-toggle:focus-visible {
-  border-color: var(--accent);
-  color: var(--accent);
+  color: var(--acc);
+  border-color: var(--acc-dim);
+  outline: none;
 }
 
-/* The two modes. Exactly one pane is shown at a time — the toggle swaps them, and #app's
-   data-mode attribute (set by main.ts) is the single switch driving both. */
+/* In edit mode the control is "live" — lit, the way an active node reads. */
+#app[data-mode="edit"] #mode-toggle {
+  color: var(--acc);
+  border-color: var(--acc-dim);
+  box-shadow: 0 0 12px rgba(63, 240, 127, 0.12);
+}
+
+/* ── The two modes ───────────────────────────────────────────────────────────────────────── */
+
+/* Exactly one pane is shown at a time. #app's data-mode attribute, set by main.ts, is the single
+   switch driving both — the CSS never needs to know why the mode changed. */
 #app[data-mode="view"] #source,
 #app[data-mode="edit"] #rendered {
   display: none;
@@ -46,30 +87,41 @@
 
 #source {
   display: block;
-  box-sizing: border-box;
   width: 100%;
   max-width: 44rem;
   margin: 0 auto;
   min-height: 70vh;
-  padding: 1.5rem;
+  padding: 2.5rem 1.5rem;
   border: none;
   outline: none;
   resize: none;
   background: var(--bg);
-  color: var(--fg);
-  font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
-  font-size: 0.95rem;
-  line-height: 1.7;
+  color: var(--ink-dim);
+  caret-color: var(--acc);
+  font-family: var(--mono);
+  font-size: 0.88rem;
+  line-height: 1.75;
   tab-size: 2;
 }
 
-/* The ephemerality notice. Stated in the interface, not just in the architecture: someone
-   typing into a box reasonably assumes it saves, and this version does not. */
+#source::selection { background: rgba(63, 240, 127, 0.20); color: var(--ink); }
+
+/* ── The ephemerality notice ─────────────────────────────────────────────────────────────── */
+
+/* Stated in the interface, not only in the architecture: someone typing into a box reasonably
+   assumes it saves, and this version does not. */
 .ephemeral-note {
   max-width: 44rem;
-  margin: 2rem auto 3rem;
+  margin: 2.5rem auto 3.5rem;
   padding: 0 1.5rem;
-  font-size: 0.78rem;
-  line-height: 1.6;
-  color: var(--muted);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  line-height: 1.75;
+  letter-spacing: 0.02em;
+  color: var(--ink-faint);
+}
+
+@media (max-width: 640px) {
+  #source { padding: 1.75rem 1.15rem; }
+  .ephemeral-note { padding: 0 1.15rem; }
 }
