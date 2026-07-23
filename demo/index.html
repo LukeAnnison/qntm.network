@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>qntm.network — markdown demo</title>
+</head>
+<body>
+<main style="max-width:44rem;margin:3rem auto;padding:0 1.25rem;font:16px/1.6 system-ui,sans-serif">
+<h1>qntm.network markdown demo</h1>
+<p>This page is rendered from <strong>markdown</strong> into HTML by a <em>traced Python capability</em> —
+<code>site-renders-markdown</code>, qntm.network's first package with a real call stack.</p>
+<h2>What it demonstrates</h2>
+<ul>
+<li>headings (three levels here)</li>
+<li>lists, like this one</li>
+<li><strong>bold</strong> and <em>italic</em></li>
+<li>inline <code>code</code></li>
+<li><a href="https://qntm.network">links</a></li>
+</ul>
+<h3>A fenced code block</h3>
+<pre><code class="language-python">from qntm_network.render import MarkdownRenderer
+
+MarkdownRenderer().to_html(&quot;# hello&quot;)  # pure: markdown -&gt; html
+</code></pre>
+<h3>A table</h3>
+<table>
+<thead>
+<tr>
+<th>layer</th>
+<th>thing</th>
+<th style="text-align:center">depth to sink</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>capability</td>
+<td>site-renders-markdown</td>
+<td style="text-align:center">2</td>
+</tr>
+<tr>
+<td>class</td>
+<td>MarkdownRenderer (pure leaf)</td>
+<td style="text-align:center">off-path</td>
+</tr>
+<tr>
+<td>sink</td>
+<td>rendered-page-written</td>
+<td style="text-align:center">0</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>The number is read from the <strong>actual</strong> observed flow, not the declared one — so it catches
+the layer you did not mean to add.</p>
+</blockquote>
+
+</main>
+</body>
+</html>

@@ -1,0 +1,13 @@
+[project]
+name = "qntm-network"
+version = "0.1.0"
+description = "qntm.network — traced Python for the site (render domain and beyond)."
+requires-python = ">=3.11"
+dependencies = ["markdown-it-py>=3.0"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["qntm_network*"]
