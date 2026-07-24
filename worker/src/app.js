@@ -76,8 +76,40 @@ async function pendingCount(env, userId) {
   return row?.n || 0;
 }
 
-// GET /app/graph (session) — reassemble the latest snapshot from its split D1 rows.
+// GET /app/graph (session) — serve the projection. The hosted model (Fly) is the source of
+// truth; the D1 snapshot is a fallback for when the server is unreachable.
 async function graphGet(request, env, origin, session) {
+  // Prefer the hosted model. A failure here (cold start timeout, outage) falls through to D1.
+  if (env.GRAPH_SERVER_URL && env.SERVER_TOKEN) {
+    try {
+      const r = await fetch(`${env.GRAPH_SERVER_URL}/graph`, {
+        headers: { Authorization: `Bearer ${env.SERVER_TOKEN}` },
+      });
+      if (r.ok) {
+        const e = await r.json();
+        return json(
+          {
+            ok: true,
+            handle: session.handle,
+            source: "server",
+            snapshot: {
+              version: null,
+              generated_at: e.generated_at,
+              views: e.views || [],
+              graph: e.graph || {},
+              locations: e.locations || {},
+            },
+            pending_edits: await pendingCount(env, session.user_id),
+          },
+          200,
+          origin
+        );
+      }
+    } catch {
+      // fall through to the D1 snapshot
+    }
+  }
+
   const head = await env.DB.prepare(
     `SELECT version, generated_at, graph_json, locations_json FROM graph_snapshots
       WHERE user_id = ? ORDER BY version DESC LIMIT 1`

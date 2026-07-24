@@ -9,3 +9,4 @@ brand/docs/architecture/derived-flows.yaml
 *.egg-info/
 scripts/graph-sync.config.json
 scripts/.graph-push-key
+scripts/.server-token

@@ -23,7 +23,7 @@
  */
 
 import { execFileSync } from "node:child_process";
-import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from "node:fs";
 import { homedir, tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -175,15 +175,101 @@ async function push({ dryRun }) {
   console.log(`pushed — version ${body.version}, ${body.applied} edit(s) marked applied`);
 }
 
+// ── server client: THE SWAP ───────────────────────────────────────────────────────────────
+// push my vault delta up  ->  server runs the cycle (the model is there)  ->  pull the projection.
+// This is the client pattern the web and other computers re-use. The old `push` (below) shipped a
+// laptop-COMPUTED snapshot to D1; it's legacy now that the model lives on the server.
+
+const SERVER_KEY_FILE = join(HERE, ".server-token");
+
+function serverAuth() {
+  const key =
+    process.env.SERVER_TOKEN ||
+    (existsSync(SERVER_KEY_FILE) ? readFileSync(SERVER_KEY_FILE, "utf8").trim() : "");
+  if (!key) throw new Error("no server token — set SERVER_TOKEN or write scripts/.server-token");
+  return key;
+}
+
+function serverUrl(cfg) {
+  if (!cfg.server) throw new Error("config.server not set (the Fly server URL)");
+  return cfg.server.replace(/\/$/, "");
+}
+
+// gzip tar of the vault CONTENTS — no top dir, no .obsidian, no macOS ._ AppleDouble junk.
+function tarVault(vaultDir) {
+  return execFileSync(
+    "tar",
+    ["--exclude=./.obsidian", "-czf", "-", "-C", expand(vaultDir), "."],
+    { env: { ...process.env, COPYFILE_DISABLE: "1" }, maxBuffer: 256 * 1024 * 1024 }
+  );
+}
+
+function untarInto(buf, targetDir) {
+  mkdirSync(expand(targetDir), { recursive: true });
+  execFileSync("tar", ["-xzf", "-", "-C", expand(targetDir)], {
+    input: buf,
+    maxBuffer: 256 * 1024 * 1024,
+  });
+}
+
+async function serverPull(targetDir, { quiet = false } = {}) {
+  const cfg = loadConfig();
+  const res = await fetch(`${serverUrl(cfg)}/vault`, {
+    headers: { Authorization: `Bearer ${serverAuth()}` },
+  });
+  if (!res.ok) throw new Error(`pull failed: ${res.status}`);
+  untarInto(Buffer.from(await res.arrayBuffer()), targetDir);
+  if (!quiet) console.log(`pulled projection -> ${expand(targetDir)}`);
+}
+
+async function serverCycle() {
+  const cfg = loadConfig();
+  const base = serverUrl(cfg);
+  const key = serverAuth();
+
+  // 1. push the whole vault up (the delta surface) — silent; the summary below is the signal
+  const up = await fetch(`${base}/vault`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/gzip" },
+    body: tarVault(cfg.vaultDir),
+  });
+  if (!up.ok) throw new Error(`vault push failed: ${up.status}`);
+
+  // 2. run the cycle ON THE SERVER — the model updates there, not here. Send our terminal width
+  //    so the rules fit, and print qntm-md's own canonical summary verbatim (it carries the
+  //    `qntm-cycle ✓ Ns` headline itself).
+  const cols = process.stdout.columns || 100;
+  const cy = await fetch(`${base}/cycle?width=${cols}`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${key}` },
+  });
+  const summary = await cy.json();
+  if (!cy.ok || !summary.ok) {
+    throw new Error(`cycle failed: ${cy.status} ${JSON.stringify(summary)}`);
+  }
+  if (summary.summary_text) process.stdout.write(summary.summary_text.replace(/\n+$/, "") + "\n");
+
+  // 3. pull the re-projected vault back down (silent)
+  await serverPull(cfg.vaultDir, { quiet: true });
+}
+
 const [cmd, ...rest] = process.argv.slice(2);
 const dryRun = rest.includes("--dry-run");
+const toIdx = rest.indexOf("--to");
+const toDir = toIdx >= 0 ? rest[toIdx + 1] : null;
 
-if (cmd === "push") {
-  push({ dryRun }).catch((err) => {
-    console.error(String(err?.message || err));
-    process.exit(1);
-  });
-} else {
-  console.error("usage: node scripts/graph-sync.mjs push [--dry-run]");
+const commands = {
+  cycle: () => serverCycle(),
+  pull: () => serverPull(toDir || loadConfig().vaultDir),
+  push: () => push({ dryRun }), // legacy: laptop-computed D1 snapshot
+};
+
+const fn = commands[cmd];
+if (!fn) {
+  console.error("usage: node scripts/graph-sync.mjs <cycle | pull [--to DIR] | push [--dry-run]>");
   process.exit(2);
 }
+fn().catch((err) => {
+  console.error(String(err?.message || err));
+  process.exit(1);
+});
